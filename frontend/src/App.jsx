@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import gsap from 'gsap';
 import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import EmotionScanner from './components/EmotionScanner';
@@ -7,6 +8,7 @@ import StoryReader from './components/StoryReader';
 import StutterAnalyzer from './components/StutterAnalyzer';
 import SignTranslator from './components/SignTranslator';
 import TtsPlayer from './components/TtsPlayer';
+import ToastContainer, { showToast } from './components/Toast';
 
 const GATEWAY_URL = (typeof process !== 'undefined' && process.env?.REACT_APP_GATEWAY_URL) ||
   import.meta.env?.VITE_GATEWAY_URL ||
@@ -19,6 +21,7 @@ export default function App() {
   const [activeEmotion, setActiveEmotion] = useState('happy');
   const [ttsText, setTtsText] = useState('');
   const [ttsEmotion, setTtsEmotion] = useState('happy');
+  const contentRef = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -31,14 +34,30 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    if (contentRef.current) {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReducedMotion) {
+        gsap.fromTo(
+          contentRef.current,
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
+        );
+      }
+    }
+  }, [activeTab]);
+
   const handleSynthesizeStory = (content, emotion) => {
     setTtsText(content);
     setTtsEmotion(emotion || 'happy');
     setActiveTab('tts');
+    showToast('Navigated to TTS Speech Synthesizer.', 'info');
   };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      <ToastContainer />
+
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -47,6 +66,7 @@ export default function App() {
         onLogout={() => {
           localStorage.removeItem('token');
           setUser(null);
+          showToast('Logged out successfully.', 'info');
         }}
       />
 
@@ -66,7 +86,7 @@ export default function App() {
           </div>
           {activeEmotion && (
             <div className="hidden sm:flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-800">
-              <span className="text-xs text-slate-400">Current Emotion State:</span>
+              <span className="text-xs text-slate-400">Active Emotion State:</span>
               <span className={`text-xs font-bold uppercase px-2.5 py-0.5 rounded-full ${
                 activeEmotion === 'happy' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                 activeEmotion === 'sad' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
@@ -78,40 +98,42 @@ export default function App() {
           )}
         </div>
 
-        {/* Tab Content Routing */}
-        {activeTab === 'emotion' && (
-          <EmotionScanner
-            gatewayUrl={GATEWAY_URL}
-            onSelectEmotion={(emo) => {
-              setActiveEmotion(emo);
-              setActiveTab('stories');
-            }}
-          />
-        )}
+        {/* Animated Tab Content Region */}
+        <div ref={contentRef}>
+          {activeTab === 'emotion' && (
+            <EmotionScanner
+              gatewayUrl={GATEWAY_URL}
+              onSelectEmotion={(emo) => {
+                setActiveEmotion(emo);
+                setActiveTab('stories');
+              }}
+            />
+          )}
 
-        {activeTab === 'stories' && (
-          <StoryReader
-            gatewayUrl={GATEWAY_URL}
-            activeEmotion={activeEmotion}
-            onSynthesizeStory={handleSynthesizeStory}
-          />
-        )}
+          {activeTab === 'stories' && (
+            <StoryReader
+              gatewayUrl={GATEWAY_URL}
+              activeEmotion={activeEmotion}
+              onSynthesizeStory={handleSynthesizeStory}
+            />
+          )}
 
-        {activeTab === 'stutter' && (
-          <StutterAnalyzer gatewayUrl={GATEWAY_URL} />
-        )}
+          {activeTab === 'stutter' && (
+            <StutterAnalyzer gatewayUrl={GATEWAY_URL} />
+          )}
 
-        {activeTab === 'sign' && (
-          <SignTranslator gatewayUrl={GATEWAY_URL} />
-        )}
+          {activeTab === 'sign' && (
+            <SignTranslator gatewayUrl={GATEWAY_URL} />
+          )}
 
-        {activeTab === 'tts' && (
-          <TtsPlayer
-            gatewayUrl={GATEWAY_URL}
-            textToSynthesize={ttsText}
-            emotionToSynthesize={ttsEmotion}
-          />
-        )}
+          {activeTab === 'tts' && (
+            <TtsPlayer
+              gatewayUrl={GATEWAY_URL}
+              textToSynthesize={ttsText}
+              emotionToSynthesize={ttsEmotion}
+            />
+          )}
+        </div>
       </main>
 
       <footer className="border-t border-slate-900 py-6 text-center text-xs text-slate-500">
@@ -122,7 +144,10 @@ export default function App() {
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
         gatewayUrl={GATEWAY_URL}
-        onLoginSuccess={(u) => setUser(u)}
+        onLoginSuccess={(u) => {
+          setUser(u);
+          showToast(`Welcome back, ${u.child_name || u.email}!`, 'success');
+        }}
       />
     </div>
   );
