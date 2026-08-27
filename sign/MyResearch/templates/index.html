@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Emotion + Voice Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="bg-shape bg-shape-one"></div>
+  <div class="bg-shape bg-shape-two"></div>
+
+  <div class="suite-shell">
+    <div class="suite-shell-inner">
+      <div class="suite-brand">Care Fusion Suite</div>
+      <nav class="suite-links">
+        <a href="http://localhost:8080/index.html">Story</a>
+        <a class="active" href="http://localhost:5001/sign">Sign</a>
+        <a href="http://localhost:8100/dashboard.html">Stutter</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="page">
+    <section class="panel hero">
+      <p class="eyebrow">Emotion Prediction Backend</p>
+      <h1>Emotion + Voice Studio</h1>
+      <p class="subtitle">Type one sentence or multiple lines. The backend predicts emotion and creates TTS audio for each line.</p>
+      <p class="subtitle"><a href="/sign">Open Sign Language Console</a></p>
+    </section>
+
+    <section class="panel composer">
+      <label for="story-input">Your text</label>
+      <textarea id="story-input" placeholder="Example:
+I am so happy to see you!
+She felt sad after the game.
+He yelled loudly in anger."></textarea>
+
+      <div class="actions">
+        <button id="analyze-btn" type="button">Analyze And Generate Voice</button>
+        <button id="clear-btn" class="ghost" type="button">Clear</button>
+      </div>
+      <p id="status" class="status">Ready.</p>
+    </section>
+
+    <section class="panel">
+      <div class="result-header">
+        <h2>Results</h2>
+        <span id="count-pill" class="pill">0 items</span>
+      </div>
+      <div id="results" class="results-grid"></div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

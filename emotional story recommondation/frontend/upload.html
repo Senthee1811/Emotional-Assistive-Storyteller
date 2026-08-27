@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StoryPal | Upload Stories</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Fredoka:wght@400;600;700&family=Nunito:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sky-1: #e6f8ff;
+      --sky-2: #f6ffea;
+      --sun: #ffd166;
+      --bubble: #ffffff;
+      --ink: #1f2937;
+      --muted: #4b5563;
+      --mint: #52c7a8;
+      --coral: #ff8a65;
+      --blue: #5aa7ff;
+      --leaf: #6ccf74;
+      --card-shadow: 0 16px 38px rgba(31, 41, 55, 0.12);
+      --radius-xl: 26px;
+      --radius-lg: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Nunito", system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 14%, rgba(255, 209, 102, 0.35), transparent 24%),
+        radial-gradient(circle at 84% 12%, rgba(82, 199, 168, 0.2), transparent 26%),
+        linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 54%, #fff8e9 100%);
+      overflow-x: hidden;
+    }
+
+    .float-shape {
+      position: fixed;
+      border-radius: 50%;
+      z-index: 0;
+      opacity: 0.5;
+      animation: drift 9s ease-in-out infinite;
+    }
+
+    .shape-a { width: 120px; height: 120px; background: #b2f7ef; top: 11%; left: -26px; }
+    .shape-b { width: 90px; height: 90px; background: #ffd6a5; top: 42%; right: -14px; animation-delay: 1.3s; }
+    .shape-c { width: 70px; height: 70px; background: #a0c4ff; bottom: 14%; left: 7%; animation-delay: 2.4s; }
+
+    @keyframes drift {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(4deg); }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 18px 20px 30px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: "Baloo 2", cursive;
+      font-size: 32px;
+      font-weight: 800;
+      color: #0f3d58;
+    }
+
+    .brand-dot {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(140deg, var(--sun), #ffad66);
+      box-shadow: 0 10px 22px rgba(255, 173, 102, 0.4);
+      font-size: 20px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #0f3d58;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(15, 61, 88, 0.1);
+      border-radius: 12px;
+      padding: 9px 12px;
+      box-shadow: 0 8px 18px rgba(15, 61, 88, 0.08);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+      background: linear-gradient(135deg, #fffef8 0%, #ffffff 100%);
+      border: 1px solid rgba(15, 61, 88, 0.08);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--card-shadow);
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-family: "Baloo 2", cursive;
+      font-size: clamp(31px, 4.8vw, 54px);
+      line-height: 1.05;
+      color: #113f61;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      font-size: 18px;
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 15px;
+      padding: 12px 16px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 10px 22px rgba(31, 41, 55, 0.16);
+    }
+
+    .btn-primary { background: linear-gradient(135deg, var(--blue), #4b87ff); }
+    .btn-secondary { background: linear-gradient(135deg, var(--mint), #2abf93); }
+
+    .mascot-wrap {
+      position: relative;
+      min-height: 250px;
+      background: linear-gradient(160deg, #e9f9ff 0%, #f2fff0 100%);
+      border-radius: 20px;
+      border: 1px solid rgba(15, 61, 88, 0.08);
+      overflow: hidden;
+    }
+
+    .cloud {
+      position: absolute;
+      background: #fff;
+      border-radius: 999px;
+      box-shadow: 0 10px 20px rgba(15, 61, 88, 0.08);
+    }
+
+    .c1 { width: 90px; height: 34px; top: 18px; left: 16px; }
+    .c2 { width: 64px; height: 28px; top: 50px; right: 18px; }
+
+    .mascot {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 178px;
+      height: 178px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 28%, #fff9d4 0%, #ffd166 70%);
+      border: 4px solid #fcbf49;
+      animation: bounce 2.3s ease-in-out infinite;
+    }
+
+    .eye {
+      position: absolute;
+      top: 72px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #1f2937;
+    }
+
+    .eye.left { left: 58px; }
+    .eye.right { right: 58px; }
+
+    .smile {
+      position: absolute;
+      left: 50%;
+      bottom: 54px;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 26px;
+      border-bottom: 4px solid #1f2937;
+      border-radius: 0 0 46px 46px;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-9px); }
+    }
+
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .upload-card {
+      background: var(--bubble);
+      border: 1px solid rgba(15, 61, 88, 0.1);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--card-shadow);
+      padding: 24px;
+      transition: transform 0.12s ease, box-shadow 0.18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--blue), var(--coral));
+    }
+
+    .upload-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 42px rgba(31, 41, 55, 0.16);
+    }
+
+    .upload-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    .icon-pdf { background: linear-gradient(135deg, #ff6b6b, #ee5a52); }
+    .icon-image { background: linear-gradient(135deg, #4ecdc4, #44a39f); }
+
+    .upload-card h2 {
+      margin: 0 0 8px;
+      font-family: "Baloo 2", cursive;
+      font-size: 24px;
+      color: #0f3d58;
+    }
+
+    .upload-card p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .file-input-label {
+      display: block;
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px dashed rgba(15, 61, 88, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .file-input-label:hover {
+      border-color: var(--blue);
+      background: rgba(90, 167, 255, 0.1);
+    }
+
+    .upload-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--blue), var(--coral));
+      color: #fff;
+      border: none;
+      border-radius: 15px;
+      padding: 14px 20px;
+      font-family: "Fredoka", sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(90, 167, 255, 0.3);
+      margin-top: 12px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(90, 167, 255, 0.4);
+    }
+
+    .upload-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status-message {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .status-success {
+      background: rgba(76, 175, 80, 0.1);
+      color: #2e7d32;
+      border: 1px solid rgba(76, 175, 80, 0.2);
+    }
+
+    .status-error {
+      background: rgba(244, 67, 54, 0.1);
+      color: #c62828;
+      border: 1px solid rgba(244, 67, 54, 0.2);
+    }
+
+    .status-loading {
+      background: rgba(90, 167, 255, 0.1);
+      color: #1976d2;
+      border: 1px solid rgba(90, 167, 255, 0.2);
+    }
+
+    .story-box {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 61, 88, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.5;
+      color: var(--ink);
+      white-space: pre-wrap;
+      margin-top: 12px;
+      font-size: 14px;
+      box-shadow: 0 8px 20px rgba(15, 61, 88, 0.06);
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      text-align: center;
+      font-weight: 800;
+      color: #3e647f;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(15, 61, 88, 0.08);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-family: "Fredoka", sans-serif;
+    }
+
+    @media (max-width: 980px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+      .upload-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page { padding: 14px; }
+      .brand { font-size: 28px; }
+      .hero p { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="float-shape shape-a"></div>
+  <div class="float-shape shape-b"></div>
+  <div class="float-shape shape-c"></div>
+
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-dot">📤</div>
+        StoryPal Upload
+      </div>
+      <nav class="nav">
+        <a href="index.html">📖 Home</a>
+        <a href="recommend.html">📚 Stories</a>
+        <a href="http://localhost:5001/sign">🤟 Sign</a>
+        <a href="http://localhost:8100/dashboard.html">🗣️ Stutter</a>
+        <a class="active" href="upload.html">📁 Upload</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h1>Add Your Wonderful Stories!</h1>
+        <p>Upload PDFs or pictures to grow our magical story library. Every story helps us match the perfect tale for every feeling!</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="recommend.html">📚 View All Stories</a>
+          <a class="btn btn-secondary" href="index.html">🏠 Back to Home</a>
+        </div>
+      </div>
+      <div class="mascot-wrap">
+        <div class="cloud c1"></div>
+        <div class="cloud c2"></div>
+        <div class="mascot">
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+          <div class="smile"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="upload-grid">
+      <div class="upload-card">
+        <div class="upload-icon icon-pdf">📄</div>
+        <h2>PDF Story</h2>
+        <p>Upload a PDF file and we'll read the story and guess the feeling!</p>
+        <div class="file-input-wrapper">
+          <input type="file" id="pdfInput" accept=".pdf">
+          <label for="pdfInput" class="file-input-label">
+            📁 Choose PDF File
+          </label>
+        </div>
+        <button class="upload-btn" onclick="uploadPdf()" id="pdfBtn">
+          🚀 Upload PDF Story
+        </button>
+        <div id="pdfStatus" class="status-message" style="display: none;"></div>
+        <div class="story-box" id="pdfStory">No PDF uploaded yet. Choose a file above!</div>
+      </div>
+
+      <div class="upload-card">
+        <div class="upload-icon icon-image">🖼️</div>
+        <h2>Picture Story</h2>
+        <p>Upload a story picture and we'll read the words and find the emotion!</p>
+        <div class="file-input-wrapper">
+          <input type="file" id="imgInput" accept=".png,.jpg,.jpeg,.bmp,.tif,.tiff">
+          <label for="imgInput" class="file-input-label">
+            📷 Choose Picture File
+          </label>
+        </div>
+        <button class="upload-btn" onclick="uploadImg()" id="imgBtn">
+          🌟 Upload Picture Story
+        </button>
+        <div id="imgStatus" class="status-message" style="display: none;"></div>
+        <div class="story-box" id="imgStory">No picture uploaded yet. Choose a file above!</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      🌈 Made with love for children: bright, fun, and super easy to use!
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = window.API_BASE || "http://localhost:5005";
+    const BACKEND_DOWN_MSG = "😴 Story server is sleeping! Start it with: python run_all_systems.py";
+
+    // Update file input labels when files are selected
+    document.getElementById('pdfInput').addEventListener('change', function(e) {
+      const label = document.querySelector('label[for="pdfInput"]');
+      if (e.target.files.length > 0) {
+        label.textContent = `📄 ${e.target.files[0].name}`;
+        label.style.borderColor = 'var(--mint)';
+        label.style.background = 'rgba(82, 199, 168, 0.1)';
+      } else {
+        label.textContent = '📁 Choose PDF File';
+        label.style.borderColor = 'rgba(15, 61, 88, 0.2)';
+        label.style.background = 'rgba(255, 255, 255, 0.9)';
+      }
+    });
+
+    document.getElementById('imgInput').addEventListener('change', function(e) {
+      const label = document.querySelector('label[for="imgInput"]');
+      if (e.target.files.length > 0) {
+        label.textContent = `🖼️ ${e.target.files[0].name}`;
+        label.style.borderColor = 'var(--mint)';
+        label.style.background = 'rgba(82, 199, 168, 0.1)';
+      } else {
+        label.textContent = '📷 Choose Picture File';
+        label.style.borderColor = 'rgba(15, 61, 88, 0.2)';
+        label.style.background = 'rgba(255, 255, 255, 0.9)';
+      }
+    });
+
+    async function checkBackend() {
+      try {
+        const resp = await fetch(`${API_BASE}/`, { method: "GET" });
+        return resp.ok;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function showStatus(elementId, message, type) {
+      const statusEl = document.getElementById(elementId);
+      statusEl.textContent = message;
+      statusEl.className = `status-message status-${type}`;
+      statusEl.style.display = 'block';
+    }
+
+    function hideStatus(elementId) {
+      const statusEl = document.getElementById(elementId);
+      statusEl.style.display = 'none';
+    }
+
+    async function uploadPdf() {
+      const input = document.getElementById("pdfInput");
+      const btn = document.getElementById("pdfBtn");
+      
+      if (!input.files || input.files.length === 0) {
+        showStatus("pdfStatus", "📋 Please choose a PDF file first!", "error");
+        return;
+      }
+
+      // Disable button and show loading
+      btn.disabled = true;
+      btn.textContent = "⏳ Uploading...";
+      showStatus("pdfStatus", "🚀 Reading your PDF story...", "loading");
+
+      if (!(await checkBackend())) {
+        showStatus("pdfStatus", BACKEND_DOWN_MSG, "error");
+        btn.disabled = false;
+        btn.textContent = "🚀 Upload PDF Story";
+        return;
+      }
+
+      const form = new FormData();
+      form.append("file", input.files[0]);
+      
+      try {
+        const resp = await fetch(`${API_BASE}/api/upload`, { method: "POST", body: form });
+        const data = await resp.json();
+        
+        if (!resp.ok) throw new Error(data.error || "Upload failed");
+        
+        const emotion = data.emotion || "unknown";
+        const confidence = data.confidence ? Math.round(data.confidence * 100) : 0;
+        showStatus("pdfStatus", `✨ Feeling detected: ${emotion} (${confidence}% sure!)`, "success");
+        document.getElementById("pdfStory").textContent = data.story_text || "📖 No story text found in the PDF.";
+        
+      } catch (err) {
+        showStatus("pdfStatus", `❌ ${err.message || BACKEND_DOWN_MSG}`, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🚀 Upload PDF Story";
+      }
+    }
+
+    async function uploadImg() {
+      const input = document.getElementById("imgInput");
+      const btn = document.getElementById("imgBtn");
+      
+      if (!input.files || input.files.length === 0) {
+        showStatus("imgStatus", "📋 Please choose a picture file first!", "error");
+        return;
+      }
+
+      // Disable button and show loading
+      btn.disabled = true;
+      btn.textContent = "⏳ Uploading...";
+      showStatus("imgStatus", "🔍 Reading words from your picture...", "loading");
+
+      if (!(await checkBackend())) {
+        showStatus("imgStatus", BACKEND_DOWN_MSG, "error");
+        btn.disabled = false;
+        btn.textContent = "🌟 Upload Picture Story";
+        return;
+      }
+
+      const form = new FormData();
+      form.append("file", input.files[0]);
+      
+      try {
+        const resp = await fetch(`${API_BASE}/api/upload-image`, { method: "POST", body: form });
+        const data = await resp.json();
+        
+        if (!resp.ok) throw new Error(data.error || "Upload failed");
+        
+        const emotion = data.emotion || "unknown";
+        const confidence = data.confidence ? Math.round(data.confidence * 100) : 0;
+        showStatus("imgStatus", `✨ Feeling detected: ${emotion} (${confidence}% sure!)`, "success");
+        document.getElementById("imgStory").textContent = data.text || "📷 No words found in the picture.";
+        
+      } catch (err) {
+        showStatus("imgStatus", `❌ ${err.message || BACKEND_DOWN_MSG}`, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🌟 Upload Picture Story";
+      }
+    }
+  </script>
+</body>
+</html>

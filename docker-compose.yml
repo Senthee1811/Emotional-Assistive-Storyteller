@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  gateway:
+    build: ./gateway
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - AUTH_SERVICE_URL=http://auth-service:5001
+      - EMOTION_SERVICE_URL=http://emotion-service:5002
+      - STORY_SERVICE_URL=http://story-service:5003
+      - STUTTER_SERVICE_URL=http://stutter-service:5004
+      - SIGN_SERVICE_URL=http://sign-service:5005
+      - TTS_SERVICE_URL=http://tts-service:5006
+    depends_on:
+      - auth-service
+      - emotion-service
+      - story-service
+      - stutter-service
+      - sign-service
+      - tts-service
+
+  auth-service:
+    build: ./services/auth-service
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - JWT_SECRET=emotional-child-reader-secret-key-2026
+
+  emotion-service:
+    build: ./services/emotion-service
+    ports:
+      - "5002:5002"
+    environment:
+      - PORT=5002
+
+  story-service:
+    build: ./services/story-service
+    ports:
+      - "5003:5003"
+    environment:
+      - PORT=5003
+
+  stutter-service:
+    build: ./services/stutter-service
+    ports:
+      - "5004:5004"
+    environment:
+      - PORT=5004
+
+  sign-service:
+    build: ./services/sign-service
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+
+  tts-service:
+    build: ./services/tts-service
+    ports:
+      - "5006:5006"
+    environment:
+      - PORT=5006
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_GATEWAY_URL=http://localhost:4000
+    depends_on:
+      - gateway

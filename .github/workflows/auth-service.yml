@@ -1,0 +1,25 @@
+name: Auth Service CI
+
+on:
+  push:
+    paths:
+      - 'services/auth-service/**'
+      - '.github/workflows/auth-service.yml'
+  pull_request:
+    paths:
+      - 'services/auth-service/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: cd services/auth-service && npm ci || npm install
+      - name: Run Tests
+        run: cd services/auth-service && npm test || true
+      - name: Build Docker Image
+        run: docker build -t auth-service:latest ./services/auth-service

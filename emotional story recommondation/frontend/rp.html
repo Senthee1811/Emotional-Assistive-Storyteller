@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RP Frontend - Story Narrator</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0c0f1a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      padding: 16px 24px;
+      background: linear-gradient(90deg, #3b82f6, #9333ea);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { margin: 0; font-size: 1.3rem; }
+    header .links a {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      margin-left: 8px;
+      font-weight: 600;
+    }
+    .notice {
+      padding: 16px 24px;
+      background: rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .notice strong { color: #fff; }
+    iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RP Frontend Story Narrator</h1>
+    <div class="links">
+      <a href="story.html">Back to Story UI</a>
+      <a href="http://localhost:8080/narrate-stories" target="_blank">Open RP UI in new tab</a>
+    </div>
+  </header>
+  <div class="notice">
+    <strong>Note:</strong> This page embeds the RP frontend running on <code>http://localhost:8080</code>.
+    Make sure the RP dev server is running (e.g., <code>npm run dev</code> in <code>tts/RP_frontend</code>).
+  </div>
+  <iframe src="http://localhost:8080/narrate-stories" title="RP Frontend Narrator"></iframe>
+</body>
+</html>

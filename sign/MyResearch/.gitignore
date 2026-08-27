@@ -1,0 +1,96 @@
+# =========================
+# Python cache & compiled files
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Virtual environments
+# =========================
+venv/
+env/
+.venv/
+ENV/
+
+# =========================
+# IDE / Editor files
+# =========================
+.idea/
+.vscode/
+*.iml
+
+# =========================
+# OS generated files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Model & training artifacts
+# =========================
+*.h5
+*.pkl
+*.pt
+*.ckpt
+
+# =========================
+# Logs & temp files
+# =========================
+logs/
+*.log
+*.tmp
+
+# =========================
+# Dataset (optional)
+# Uncomment if you don't want to push datasets
+# =========================
+# *.csv
+
+# =========================
+# Config secrets (optional)
+# =========================
+# config.py
+# --- Python Virtual Environments (The likely cause of the 1GB size) ---
+venv/
+env/
+ENV/
+.env/
+bin/
+lib/
+include/
+
+# --- PyCharm & IDE Files ---
+.idea/
+*.iws
+*.iml
+*.ipr
+cmake-build-*/
+
+# --- Python Bytecode & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# --- Large Data & Logs (Common culprits for large repos) ---
+*.log
+*.sqlite3
+*.csv
+*.zip
+*.tar.gz
+*.7z
+
+# --- OS Specific Files ---
+.DS_Store
+Thumbs.db 
+
+# --- NEW ADDITIONS: Machine Learning Models & Checkpoints ---
+emotion_model/
+checkpoint-*/
+logs/
+*.safetensors
+*.pt
+*.pth
+*.bin

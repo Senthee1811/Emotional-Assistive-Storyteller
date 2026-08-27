@@ -1,0 +1,23 @@
+name: Gateway CI
+
+on:
+  push:
+    paths:
+      - 'gateway/**'
+      - '.github/workflows/gateway.yml'
+  pull_request:
+    paths:
+      - 'gateway/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: cd gateway && npm ci || npm install
+      - name: Build Docker Image
+        run: docker build -t gateway:latest ./gateway

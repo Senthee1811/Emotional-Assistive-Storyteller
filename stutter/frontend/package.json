@@ -1,0 +1,56 @@
+{
+  "name": "professional-stuttering-detection",
+  "version": "1.0.0",
+  "description": "Professional AI-powered stuttering detection system with real-time analysis capabilities",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "serve": "npx serve .",
+    "build": "echo 'No build process needed for static files'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "stuttering",
+    "detection",
+    "ai",
+    "speech",
+    "analysis",
+    "medical",
+    "healthcare",
+    "professional",
+    "web",
+    "frontend"
+  ],
+  "author": "Professional Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/stuttering-detection"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/stuttering-detection/issues"
+  },
+  "homepage": "https://github.com/your-org/stuttering-detection#readme",
+  "devDependencies": {
+    "serve": "^14.2.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "files": [
+    "index.html",
+    "styles.css",
+    "script.js",
+    "README.md"
+  ],
+  "config": {
+    "port": 8000,
+    "host": "localhost"
+  }
+}

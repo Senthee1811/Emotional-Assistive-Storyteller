@@ -1,0 +1,314 @@
+/* Custom CSS for Emotional Reader */
+
+/* Emotion Colors */
+.emotion-happy { color: #10b981; background-color: #d1fae5; }
+.emotion-sad { color: #3b82f6; background-color: #dbeafe; }
+.emotion-angry { color: #ef4444; background-color: #fee2e2; }
+.emotion-surprise { color: #f59e0b; background-color: #fef3c7; }
+.emotion-fear { color: #8b5cf6; background-color: #ede9fe; }
+.emotion-disgust { color: #84cc16; background-color: #ecfccb; }
+.emotion-neutral { color: #6b7280; background-color: #f3f4f6; }
+
+/* NEW THERAPEUTIC EMOTIONS */
+.emotion-calm { color: #06b6d4; background-color: #ecfeff; }
+.emotion-brave { color: #f97316; background-color: #fff7ed; }
+
+/* Smooth Transitions */
+* {
+    transition: all 0.3s ease;
+}
+
+/* Camera View Styling */
+#videoElement {
+    transform: scaleX(-1);
+}
+
+#canvasElement {
+    transform: scaleX(-1);
+}
+
+/* Emotion Bars */
+.emotion-bar {
+    width: 12px;
+    background: linear-gradient(to top, #8b5cf6, #ec4899);
+    border-radius: 6px 6px 0 0;
+    transition: height 0.5s ease;
+    position: relative;
+}
+
+.emotion-bar:hover {
+    opacity: 0.8;
+}
+
+.emotion-bar::after {
+    content: attr(data-emotion);
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+/* Story Card Animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#storyContent {
+    animation: slideIn 0.5s ease;
+}
+
+/* Button Hover Effects */
+.btn-hover {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-hover::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-hover:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Status Indicator */
+.status-active {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* Loading Animation */
+.loading-dots {
+    display: inline-block;
+}
+
+.loading-dots::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
+
+/* Story Text Styling */
+#storyText {
+    font-family: 'Georgia', serif;
+    line-height: 1.8;
+    text-align: justify;
+}
+
+#storyText::first-letter {
+    font-size: 3em;
+    font-weight: bold;
+    float: left;
+    line-height: 1;
+    margin-right: 8px;
+    color: #8b5cf6;
+}
+
+/* Saved Stories */
+.saved-story-item {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.saved-story-item:hover {
+    transform: translateX(4px);
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+    backdrop-filter: blur(5px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .text-2xl {
+        font-size: 1.5rem;
+    }
+    
+    .text-xl {
+        font-size: 1.25rem;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8b5cf6;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #7c3aed;
+}
+
+/* Emotion Detection Feedback */
+.emotion-detected {
+    animation: emotionPulse 0.6s ease;
+}
+
+@keyframes emotionPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Story Recommendation Animation */
+@keyframes storyRecommend {
+    0% {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.story-recommendation {
+    animation: storyRecommend 0.8s ease;
+}
+
+/* Floating Action Button */
+.fab {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Tooltip */
+.tooltip {
+    position: relative;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6, #ec4899);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(to br, #1f2937, #111827);
+    }
+    
+    .bg-white {
+        background-color: #1f2937 !important;
+    }
+    
+    .text-gray-800 {
+        color: #f9fafb !important;
+    }
+    
+    .text-gray-700 {
+        color: #d1d5db !important;
+    }
+    
+    .text-gray-600 {
+        color: #9ca3af !important;
+    }
+}

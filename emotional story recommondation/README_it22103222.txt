@@ -1,0 +1,196 @@
+# Emotional Reader
+
+An end-to-end prototype for detecting facial emotion, classifying story text, and recommending story content based on mood. The repo includes standalone scripts at the project root plus a Flask API in `backend/`, along with datasets, models, and a static web UI.
+
+## What this repository contains
+
+- Face emotion detection (camera or images) using PyTorch.
+- Story/text emotion classification using TF-IDF + LinearSVC.
+- Story recommendation by matching detected emotion with PDF or OCR-extracted text.
+- A Flask API for PDF/image uploads and recommendations.
+- Static frontend pages for UI prototyping.
+
+## Repository layout
+
+- `Mood_predict.py`: Live camera detection with on-change story recommendation (root pipeline).
+- `Final_recommendation.py`: Live camera detection with 15-second buffer and story preview.
+- `train.py`: Trains a ResNet18-based face model; saves `model.pth` in the repo root.
+- `preprocess.py`: Image preprocessing and dataloaders for the root training pipeline.
+- `config.py`: Root-level configuration for the ResNet18 pipeline.
+- `Story_Classfication/`: Text classifier training/inference utilities.
+  - `Train.py`: Trains TF-IDF + LinearSVC and writes to `Story_Models/`.
+  - `multi_pdf.py`: Extracts PDF text and predicts average emotion.
+  - `dataset/`: CSV splits used by `Train.py`.
+- `Story_Models/`: Saved text model artifacts (`emotion_model.pkl`, vectorizer, labels).
+- `backend/`: Flask API and a separate face-model training pipeline.
+  - `app.py`: API server for PDF/image upload, text classification, and recommendations.
+  - `story_manager.py`: Upload handling, OCR/PDF text extraction, metadata management.
+  - `train.py`: CNN-based face model training for `models/model.pth`.
+  - `preprocess.py` and `balanced_train.py`: Dataloaders and class-balancing.
+  - `config.py`: Backend training config (paths, image size, epochs).
+  - `requirements.txt`: Runtime dependencies.
+- `frontend/`: Static HTML/CSS/JS UI prototypes.
+  - `templates/` and `static/`: UI pages and assets.
+- `Dataset/` and `data/Dataset/`: Face emotion image datasets (two locations are used by different scripts).
+- `models/`: Saved face model artifacts for the backend pipeline (`models/model.pth`).
+- `data/uploaded_stories/`: Uploaded PDFs/images and metadata.
+- `docs/`, `tests/`: Documentation placeholders (no runnable tests are present).
+
+## Key pipelines and entry points
+
+### 1) Face emotion detection (root pipeline)
+- Model: ResNet18 fine-tuned on grayscale images (converted to 3 channels).
+- Config: `config.py` uses `Dataset/` and outputs `model.pth` in the repo root.
+- Run training:
+
+```bash
+python train.py
+```
+
+- Run live camera + recommendation (loads `model.pth`):
+
+```bash
+python Mood_predict.py
+# or
+python Final_recommendation.py
+```
+
+### 2) Text emotion classification (story PDFs/images)
+- Model: TF-IDF (word + char n-grams) + LinearSVC.
+- Training data: `Story_Classfication/dataset/*.csv`.
+- Outputs: `Story_Models/emotion_model.pkl`, `emotion_vectorizer.pkl`, `emotion_labels.pkl`.
+
+```bash
+python Story_Classfication/Train.py
+```
+
+- Inference helper: `Story_Classfication/multi_pdf.py` predicts an emotion for a PDF by averaging sentence-level predictions.
+
+### 3) Flask API (backend)
+- Entry point: `backend/app.py`.
+- Uses `Story_Models/` for text classification and `Story_Classfication/` for PDF parsing.
+- OCR for images relies on `pytesseract` and a working Tesseract binary in `PATH`.
+
+Install dependencies:
+
+```bash
+pip install -r backend/requirements.txt
+```
+
+Run the API:
+
+```bash
+python backend/app.py
+```
+
+Endpoints implemented in `backend/app.py`:
+- `GET /api/pdfs`: list PDFs in `Story_Classfication/test_pdfs/`.
+- `POST /api/classify`: classify a named PDF and return text + emotion.
+- `GET /api/recommend?emotion=...`: pick the best story for a target emotion.
+- `POST /api/upload`: upload and classify a PDF.
+- `POST /api/classify-text`: classify raw text; optional feedback saving.
+- `POST /api/upload-image`: OCR an image, classify it, and store it under `sorted_images/`.
+
+### 4) Frontend
+- Static pages live in `frontend/` (e.g., `frontend/index.html`, `frontend/templates/index.html`).
+- The current Flask API serves JSON only; the HTML pages are not wired to backend templates.
+
+## Dependencies and setup
+
+### Python runtime
+- Python 3.9+ recommended.
+- Use a virtual environment if possible.
+
+### Install backend dependencies
+```bash
+pip install -r backend/requirements.txt
+```
+
+### External tools (optional but used by the API)
+- Tesseract OCR: required for `/api/upload-image` and any OCR flow in `backend/story_manager.py`.
+- NLTK punkt tokenizer: downloaded automatically by `Story_Classfication/multi_pdf.py` if not cached.
+
+## Configuration reference
+
+### Root pipeline config (`config.py`)
+- `DATA_DIR`: points to `Dataset/`.
+- `IMG_SIZE`: 48.
+- `MODEL_PATH`: `model.pth`.
+- `EMOTION_CLASSES`: 7-class face emotions.
+
+### Backend pipeline config (`backend/config.py`)
+- `DATA_DIR`: points to `../data/Dataset/`.
+- `IMG_SIZE`: 64.
+- `NUM_EPOCHS`: 3 (short training run).
+- `MODEL_PATH`: `../models/model.pth`.
+
+### Story model labels
+- Text labels are defined in `Story_Classfication/Train.py` (see `EMOTION_LABELS`).
+- Label mappings are saved in `Story_Models/emotion_labels.pkl`.
+
+## API usage examples
+
+Classify a PDF by filename:
+```bash
+curl -X POST http://localhost:5000/api/classify ^
+  -H "Content-Type: application/json" ^
+  -d "{\"filename\":\"story_1.pdf\"}"
+```
+
+Recommend a story for an emotion:
+```bash
+curl "http://localhost:5000/api/recommend?emotion=happy"
+```
+
+Upload a PDF file:
+```bash
+curl -X POST http://localhost:5000/api/upload ^
+  -F "file=@Story_Classfication/test_pdfs/story_1.pdf"
+```
+
+Classify raw text:
+```bash
+curl -X POST http://localhost:5000/api/classify-text ^
+  -H "Content-Type: application/json" ^
+  -d "{\"text\":\"I feel calm and safe today.\"}"
+```
+
+## Data and model locations
+
+## Data and model locations
+
+- Face model (root pipeline): `model.pth`.
+- Face model (backend pipeline): `models/model.pth`.
+- Text model artifacts: `Story_Models/`.
+- Story PDFs for classification: `Story_Classfication/test_pdfs/`.
+- Uploaded files + metadata: `data/uploaded_stories/` and `data/story_metadata.json`.
+
+## Notes and gotchas
+
+- There are two face-model pipelines: the root scripts use a ResNet18 (`train.py`), while `backend/train.py` defines a custom CNN and writes to `models/model.pth`.
+- `Story_Classfication/multi_pdf.py` calls `nltk.download('punkt')` at import time, which will require network access if the tokenizer is not cached.
+- The `tests/` folder contains documentation only; no test files are present in this repo snapshot.
+
+## Troubleshooting
+
+- Camera not opening: ensure another app is not using the camera and `opencv-python` is installed.
+- Missing `model.pth`: run the appropriate training script or copy a pretrained model into place.
+- OCR errors: install Tesseract and ensure it is in `PATH`.
+- PDF with no text: scanned PDFs may need OCR; `multi_pdf.py` expects extractable text.
+
+## Typical workflows
+
+- Train both models and run local camera + story recommendation:
+
+```bash
+python train.py
+python Story_Classfication/Train.py
+python Mood_predict.py
+```
+
+- Start the API and interact with it from the frontend or a REST client:
+
+```bash
+pip install -r backend/requirements.txt
+python backend/app.py
+```

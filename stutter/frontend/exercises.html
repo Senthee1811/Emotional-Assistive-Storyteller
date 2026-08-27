@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speech Therapy Exercises</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+        body {
+            background:
+                radial-gradient(circle at 10% 20%, rgba(79, 139, 255, 0.18), transparent 32%),
+                radial-gradient(circle at 90% 10%, rgba(255, 95, 162, 0.22), transparent 30%),
+                radial-gradient(circle at 50% 90%, rgba(255, 209, 102, 0.20), transparent 38%),
+                linear-gradient(180deg, #f9fbff 0%, #f3f6ff 50%, #f5f7ff 100%);
+            min-height: 100vh;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .suite-shell {
+            max-width: 1400px;
+            margin: 14px auto 0;
+            padding: 0 1rem;
+        }
+        .suite-shell-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.86);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            padding: 10px 12px;
+            box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+        }
+        .suite-brand { font-weight: 800; color: #0f3d58; font-size: 1.1rem; }
+        .suite-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .suite-links a {
+            color:#0f3d58;
+            text-decoration:none;
+            font-weight:700;
+            background:#fff;
+            border:1px solid rgba(15,23,42,0.12);
+            border-radius:10px;
+            padding:7px 10px;
+        }
+        .suite-links a.active {
+            color:#fff;
+            border-color: transparent;
+            background: linear-gradient(135deg, #5aa7ff, #4b87ff);
+        }
+        
+        .navbar {
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(15,23,42,0.08);
+        }
+        
+        .container-fluid {
+            padding-top: 20px;
+        }
+        
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .exercise-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .exercise-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .exercise-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .exercise-severity {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .exercise-body {
+            padding: 25px;
+        }
+        
+        .exercise-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .exercise-description {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .exercise-instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .exercise-instructions h6 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .exercise-instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .exercise-instructions li {
+            margin-bottom: 10px;
+        }
+        
+        .practice-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .practice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+        }
+        
+        .progress-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .progress-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+        
+        .timer-display {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            .exercise-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+  </head>
+  <body>
+    <div class="suite-shell">
+      <div class="suite-shell-inner">
+        <div class="suite-brand">Care Fusion Suite</div>
+        <nav class="suite-links">
+          <a href="http://localhost:8080/index.html">Story</a>
+          <a href="http://localhost:5001/sign">Sign</a>
+          <a class="active" href="http://localhost:8100/exercises.html">Stutter</a>
+          <a href="dashboard.html">Dashboard</a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="dashboard.html">
+          <i class="fas fa-dumbbell me-2"></i>
+          Speech Therapy
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+          <a href="dashboard.html" class="nav-link">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            Dashboard
+          </a>
+          <a href="exercises.html" class="nav-link active">
+            <i class="fas fa-dumbbell me-2"></i>
+            Exercises
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="text-center mb-4">
+            <h1 style="color:#0f172a;">Speech Therapy Exercises</h1>
+            <p style="color:#4b5563;">Practice these exercises to improve speech fluency</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mild Exercises -->
+      <div class="row">
+        <div class="col-12">
+          <h2 style="color:#0f172a;" class="mb-4">Mild Exercises</h2>
+        </div>
+      </div>
+      
+      <div class="exercise-grid">
+        <!-- Exercise 1: Slow Reading -->
+        <div class="exercise-card">
+          <div class="exercise-header">
+            <div class="exercise-severity">MILD</div>
+            <h3 class="exercise-title">Slow Reading Practice</h3>
+          </div>
+          <div class="exercise-body">
+            <p class="exercise-description">
+              Read a paragraph at half your normal speaking speed, focusing on each word. This helps improve rhythm and reduce rushing.
+            </p>
+            <div class="exercise-instructions">
+              <h6>Instructions:</h6>
+              <ol>
+                <li>Choose a simple paragraph or children's book</li>
+                <li>Read each word slowly and clearly</li>
+                <li>Take brief pauses between sentences</li>
+                <li>Focus on proper pronunciation</li>
+                <li>Practice for 5-10 minutes daily</li>
+              </ol>
+            </div>
+            <button class="practice-btn" onclick="startExercise('slow_reading')">
+              Start Practice
+            </button>
+          </div>
+        </div>
+
+        <!-- Exercise 2: Breathing -->
+        <div class="exercise-card">
+          <div class="exercise-header">
+            <div class="exercise-severity">MILD</div>
+            <h3 class="exercise-title">Deep Breathing Exercise</h3>
+          </div>
+          <div class="exercise-body">
+            <p class="exercise-description">
+              Proper breathing technique reduces anxiety and improves speech control. Practice diaphragmatic breathing for better voice support.
+            </p>
+            <div class="exercise-instructions">
+              <h6>Instructions:</h6>
+              <ol>
+                <li>Sit comfortably with straight posture</li>
+                <li>Inhale deeply through your nose for 4 counts</li>
+                <li>Hold your breath for 4 counts</li>
+                <li>Exhale slowly through your mouth for 6 counts</li>
+                <li>Repeat 10-15 times</li>
+                <li>Practice twice daily</li>
+              </ol>
+            </div>
+            <button class="practice-btn" onclick="startExercise('breathing')">
+              Start Practice
+            </button>
+          </div>
+        </div>
+
+        <!-- Exercise 3: Gentle Onset -->
+        <div class="exercise-card">
+          <div class="exercise-header">
+            <div class="exercise-severity">MILD</div>
+            <h3 class="exercise-title">Gentle Onset Technique</h3>
+          </div>
+          <div class="exercise-body">
+            <p class="exercise-description">
+              Start words with a soft, gentle sound instead of forcing them out abruptly. This reduces speech tension and improves flow.
+            </p>
+            <div class="exercise-instructions">
+              <h6>Instructions:</h6>
+              <ol>
+                <li>Choose simple words like "cat", "dog", "sun"</li>
+                <li>Practice saying the word with minimal lip pressure</li>
+                <li>Start with a gentle "h" or "sh" sound</li>
+                <li>Gradually increase to the full word</li>
+                <li>Practice 5-10 minutes daily</li>
+              </ol>
+            </div>
+            <button class="practice-btn" onclick="startExercise('gentle_onset')">
+              Start Practice
+            </button>
+          </div>
+        </div>
+
+        <!-- Exercise 4: Pausing Technique -->
+        <div class="exercise-card">
+          <div class="exercise-header">
+            <div class="exercise-severity">MILD</div>
+            <h3 class="exercise-title">Pausing Technique</h3>
+          </div>
+          <div class="exercise-body">
+            <p class="exercise-description">
+              Insert brief pauses between phrases to reduce rushing and anxiety. This gives you time to plan your next words and speak more calmly.
+            </p>
+            <div class="exercise-instructions">
+              <h6>Instructions:</h6>
+              <ol>
+                <li>Choose short phrases or sentences</li>
+                <li>Practice saying a phrase, then pause for 2-3 seconds</li>
+                <li>Focus on relaxing your jaw and shoulders</li>
+                <li>Gradually increase phrase length</li>
+                <li>Use in conversation practice</li>
+              </ol>
+            </div>
+            <button class="practice-btn" onclick="startExercise('pausing')">
+              Start Practice
+            </button>
+          </div>
+        </div>
+
+        <!-- Exercise 5: Mirror Practice -->
+        <div class="exercise-card">
+          <div class="exercise-header">
+            <div class="exercise-severity">MILD</div>
+            <h3 class="exercise-title">Mirror Practice</h3>
+          </div>
+          <div class="exercise-body">
+            <p class="exercise-description">
+              Watch yourself speak in a mirror to identify tension in facial muscles. This awareness helps you relax and speak more naturally.
+            </p>
+            <div class="exercise-instructions">
+              <h6>Instructions:</h6>
+              <ol>
+                <li>Stand in front of a mirror at eye level</li>
+                <li>Practice saying simple words and phrases</li>
+                <li>Watch for tension in your forehead, jaw, and neck</li>
+                <li>Relax tense muscles when you notice them</li>
+                <li>Practice 5-10 minutes daily</li>
+              </ol>
+            </div>
+            <button class="practice-btn" onclick="startExercise('mirror')">
+              Start Practice
+            </button>
+          </div>
+        </div>
+
+        <!-- Exercise 6: Syllable Repetition -->
+        <div class="exercise-card">
+          <div class="exercise-header">
+            <div class="exercise-severity">MILD</div>
+            <h3 class="exercise-title">Syllable Repetition</h3>
+          </div>
+          <div class="exercise-body">
+            <p class="exercise-description">
+              Practice saying multi-syllable words slowly, breaking them into parts. This improves control over speech rhythm and reduces stuttering.
+            </p>
+            <div class="exercise-instructions">
+              <h6>Instructions:</h6>
+              <ol>
+                <li>Start with words like "el-e-phant" (3 syllables)</li>
+                <li>Say each syllable clearly and separately</li>
+                <li>Gradually speed up to normal pace</li>
+                <li>Practice with different word lengths</li>
+                <li>Focus on smooth transitions between syllables</li>
+              </ol>
+            </div>
+            <button class="practice-btn" onclick="startExercise('syllable_repetition')">
+              Start Practice
+            </button>
+          </div>
+        </div>
+
+        <!-- Exercise 7: Light Articulation -->
+        <div class="exercise-card">
+          <div class="exercise-header">
+            <div class="exercise-severity">MILD</div>
+            <h3 class="exercise-title">Light Articulation</h3>
+          </div>
+          <div class="exercise-body">
+            <p class="exercise-description">
+              Use minimal tongue and lip pressure when forming sounds. This reduces muscle tension and improves speech clarity.
+            </p>
+            <div class="exercise-instructions">
+              <h6>Instructions:</h6>
+              <ol>
+                <li>Practice individual sounds: "ah", "ee", "oh"</li>
+                <li>Hold each sound for 3-5 seconds</li>
+                <li>Focus on relaxed jaw and lips</li>
+                <li>Combine sounds into simple words</li>
+                <li>Practice 5-10 minutes daily</li>
+              </ol>
+            </div>
+            <button class="practice-btn" onclick="startExercise('light_articulation')">
+              Start Practice
+            </button>
+          </div>
+        </div>
+
+        <!-- Exercise 8: Continuous Phonation -->
+        <div class="exercise-card">
+          <div class="exercise-header">
+            <div class="exercise-severity">MILD</div>
+            <h3 class="exercise-title">Continuous Phonation</h3>
+          </div>
+          <div class="exercise-body">
+            <p class="exercise-description">
+              Practice maintaining a steady voice sound while saying vowels. This improves breath support and voice quality.
+            </p>
+            <div class="exercise-instructions">
+              <h6>Instructions:</h6>
+              <ol>
+                <li>Take a comfortable breath</li>
+                <li>Say "ahhh" in a steady, continuous tone</li>
+                <li>Focus on consistent volume and pitch</li>
+                <li>Practice for 3-5 minutes daily</li>
+                <li>Try different vowel sounds: "ohhh", "ehhh"</li>
+              </ol>
+            </div>
+            <button class="practice-btn" onclick="startExercise('continuous_phonation')">
+              Start Practice
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Coaching Assistant Section -->
+      <div class="row">
+        <div class="col-12">
+          <div class="personalized-section">
+            <div class="text-center mb-4">
+              <h2>🤖 AI Coaching Assistant</h2>
+              <p class="text-muted">Real-time feedback and personalized guidance during practice</p>
+            </div>
+            
+            <!-- AI Coaching Controls -->
+            <div class="row mb-4">
+              <div class="col-md-8">
+                <div class="d-flex gap-3 mb-3">
+                  <button class="btn btn-success" id="startCoachingBtn" onclick="startAICoaching()">
+                    <i class="fas fa-play me-2"></i>Start AI Coaching
+                  </button>
+                  <button class="btn btn-danger" id="stopCoachingBtn" onclick="stopAICoaching()" disabled>
+                    <i class="fas fa-stop me-2"></i>Stop Coaching
+                  </button>
+                  <button class="btn btn-info" onclick="toggleCoachingMode()">
+                    <i class="fas fa-cog me-2"></i>Mode: <span id="coachingMode">Guided</span>
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="text-end">
+                  <span class="badge bg-primary" id="coachingStatus">
+                    <i class="fas fa-circle me-1"></i>Ready
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Real-time Feedback Display -->
+            <div id="aiFeedbackPanel" class="mb-4" style="display: none;">
+              <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                  <h5 class="mb-0">
+                    <i class="fas fa-robot me-2"></i>AI Coach Feedback
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <div id="realTimeFeedback" class="mb-3">
+                    <div class="alert alert-info">
+                      <i class="fas fa-info-circle me-2"></i>
+                      <span id="currentFeedback">Listening... Start speaking to begin coaching.</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Voice Metrics -->
+                  <div class="row">
+                    <div class="col-md-3">
+                      <div class="text-center">
+                        <div class="h4 text-primary" id="paceMetric">--</div>
+                        <small class="text-muted">Speaking Pace</small>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="text-center">
+                        <div class="h4 text-success" id="volumeMetric">--</div>
+                        <small class="text-muted">Volume Level</small>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="text-center">
+                        <div class="h4 text-warning" id="tensionMetric">--</div>
+                        <small class="text-muted">Tension Level</small>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="text-center">
+                        <div class="h4 text-info" id="confidenceMetric">--</div>
+                        <small class="text-muted">Confidence</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Coaching History -->
+            <div id="coachingHistory" class="mb-4" style="display: none;">
+              <h6>📝 Coaching History</h6>
+              <div class="list-group" id="feedbackHistory" style="max-height: 200px; overflow-y: auto;">
+                <!-- Coaching feedback will appear here -->
+              </div>
+            </div>
+            
+            <!-- AI Insights -->
+            <div id="aiInsights" class="row" style="display: none;">
+              <div class="col-md-6">
+                <div class="card border-success">
+                  <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                      <i class="fas fa-lightbulb me-2"></i>AI Insights
+                    </h6>
+                  </div>
+                  <div class="card-body">
+                    <div id="insightsContent">
+                      <p class="text-muted">Complete a coaching session to see AI insights...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card border-warning">
+                  <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                      <i class="fas fa-chart-line me-2"></i>Progress Tracking
+                    </h6>
+                  </div>
+                  <div class="card-body">
+                    <div id="progressContent">
+                      <p class="text-muted">Start coaching to track your progress...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Section -->
+      <div class="row mt-5">
+        <div class="col-12">
+          <div class="progress-section">
+            <h3 class="text-white">⏱️ Practice Progress</h3>
+            <div class="progress-item">
+              <span>Current Exercise:</span>
+              <span id="currentExercise">Not Started</span>
+            </div>
+            <div class="progress-item">
+              <span>Practice Time:</span>
+              <span class="timer-display" id="practiceTimer">00:00</span>
+            </div>
+            <div class="progress-item">
+              <button class="back-btn" onclick="stopExercise()">
+                <i class="fas fa-stop me-2"></i>
+                Stop Practice
+              </button>
+              <button class="back-btn" onclick="goToDashboard()">
+                <i class="fas fa-home me-2"></i>
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        let currentExercise = null;
+        let practiceStartTime = null;
+        let timerInterval = null;
+
+        function startExercise(exerciseType) {
+            currentExercise = exerciseType;
+            practiceStartTime = Date.now();
+            
+            // Update UI
+            document.getElementById('currentExercise').textContent = formatExerciseName(exerciseType);
+            
+            // Start timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            // In a real implementation, this would start exercise tracking
+            console.log(`Starting exercise: ${exerciseType}`);
+        }
+
+        function stopExercise() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            const practiceTime = practiceStartTime ? Math.floor((Date.now() - practiceStartTime) / 1000) : 0;
+            
+            // Update UI
+            document.getElementById('currentExercise').textContent = `Completed: ${formatExerciseName(currentExercise)}`;
+            document.getElementById('practiceTimer').textContent = formatTime(practiceTime);
+            
+            // In a real implementation, this would save exercise data
+            console.log(`Exercise completed. Practice time: ${practiceTime}s`);
+            
+            currentExercise = null;
+            practiceStartTime = null;
+        }
+
+        function updateTimer() {
+            if (practiceStartTime) {
+                const elapsed = Math.floor((Date.now() - practiceStartTime) / 1000);
+                document.getElementById('practiceTimer').textContent = formatTime(elapsed);
+            }
+        }
+
+        function formatExerciseName(exerciseType) {
+            const names = {
+                'slow_reading': 'Slow Reading',
+                'breathing': 'Deep Breathing',
+                'gentle_onset': 'Gentle Onset',
+                'pausing': 'Pausing Technique',
+                'mirror': 'Mirror Practice',
+                'syllable_repetition': 'Syllable Repetition',
+                'light_articulation': 'Light Articulation',
+                'continuous_phonation': 'Continuous Phonation'
+            };
+            return names[exerciseType] || exerciseType;
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function goToDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+    <script src="./exercises.js"></script>
+    <script src="./ai-coaching.js"></script>
+  </body>
+</html>

@@ -1,0 +1,50 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+audio_outputs/
+uploads/
+
+# Datastores & SQLite
+*.db
+*.sqlite3
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+.services_pids.json
+
+# Docker / PID
+*.pid
+
+# Datasets & ML model artifacts (large binaries)
+*.csv
+*.pt
+*.pth
+*.h5
+*.pkl
+*.onnx
+*.ckpt
+models/*.bin
+DataSet/
+Dataset/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+logs/

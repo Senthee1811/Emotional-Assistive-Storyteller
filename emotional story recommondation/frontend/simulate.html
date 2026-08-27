@@ -1,0 +1,1089 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StoryPal | Simulate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Manrope:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg: #f5f7ff;
+        --panel: #ffffff;
+        --muted: #4b5563;
+        --text: #0f172a;
+        --accent: #4f8bff;
+        --accent-2: #ff5fa2;
+        --radius: 18px;
+        --shadow: 0 18px 48px rgba(15, 23, 42, 0.15);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family:
+          "Comic Neue",
+          "Manrope",
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background:
+          radial-gradient(
+            circle at 10% 20%,
+            rgba(79, 139, 255, 0.18),
+            transparent 32%
+          ),
+          radial-gradient(
+            circle at 90% 10%,
+            rgba(255, 95, 162, 0.22),
+            transparent 30%
+          ),
+          radial-gradient(
+            circle at 50% 90%,
+            rgba(255, 209, 102, 0.2),
+            transparent 38%
+          ),
+          linear-gradient(180deg, #f9fbff 0%, #f3f6ff 50%, #f5f7ff 100%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      .suite-shell {
+        max-width: 1120px;
+        margin: 0 auto 14px;
+      }
+      .suite-shell-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 10px 12px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+      }
+      .suite-brand {
+        font-weight: 800;
+        color: #0f3d58;
+        font-size: 1.1rem;
+      }
+      .suite-links {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .suite-links a {
+        color: #0f3d58;
+        text-decoration: none;
+        font-weight: 700;
+        background: #fff;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 10px;
+        padding: 7px 10px;
+        box-shadow: none;
+      }
+      .suite-links a.active {
+        color: #fff;
+        border-color: transparent;
+        background: linear-gradient(135deg, #5aa7ff, #4b87ff);
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      .title {
+        font-size: 26px;
+        font-weight: 800;
+        color: #0f172a;
+      }
+      a {
+        color: #0f172a;
+        text-decoration: none;
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 8px 12px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        border-radius: var(--radius);
+        padding: 18px;
+        box-shadow: var(--shadow);
+      }
+      h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+      .subtext {
+        color: var(--muted);
+        margin: 0 0 10px;
+      }
+      .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        margin-right: 8px;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .status-chip .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 6px rgba(79, 139, 255, 0.18);
+      }
+      .status-chip.warning .dot {
+        background: #f59e0b;
+        box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.14);
+      }
+      .story-box {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 12px;
+        padding: 12px;
+        max-height: 320px;
+        overflow: auto;
+        line-height: 1.5;
+        color: #0f172a;
+        white-space: pre-wrap;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      button {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #0b1120;
+        border: none;
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(79, 139, 255, 0.25);
+        letter-spacing: 0.2px;
+      }
+      select,
+      textarea {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 14px;
+        font-family: inherit;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+      }
+      .mood-selector {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+      .mood-btn {
+        background: linear-gradient(135deg, #4f8bff, #ff5fa2);
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 20px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(79, 139, 255, 0.25);
+      }
+      .mood-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(79, 139, 255, 0.35);
+      }
+      .mood-btn.selected {
+        background: linear-gradient(135deg, #10b981, #059669);
+        transform: scale(1.05);
+      }
+      .mood-emoji {
+        font-size: 32px;
+        display: block;
+        margin-bottom: 8px;
+      }
+      .mode-btn {
+        background: linear-gradient(135deg, #4f8bff, #ff5fa2);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(79, 139, 255, 0.25);
+      }
+      .mode-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(79, 139, 255, 0.35);
+      }
+      .mode-btn.active {
+        background: linear-gradient(135deg, #10b981, #059669);
+        transform: scale(1.05);
+      }
+
+      /* Modal styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+      }
+
+      .modal-content {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        margin: 15% auto;
+        padding: 30px;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        border: 2px solid rgba(79, 139, 255, 0.1);
+      }
+
+      .modal-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 16px;
+        font-family: "Comic Neue", cursive;
+      }
+
+      .modal-subtitle {
+        font-size: 16px;
+        color: var(--muted);
+        margin-bottom: 24px;
+        line-height: 1.4;
+      }
+
+      .modal-options {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .modal-option {
+        flex: 1;
+        min-width: 140px;
+        background: linear-gradient(135deg, #4f8bff, #ff5fa2);
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 16px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(79, 139, 255, 0.25);
+        text-align: center;
+      }
+
+      .modal-option:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(79, 139, 255, 0.35);
+      }
+
+      .modal-option i {
+        font-size: 24px;
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .modal-close {
+        background: #64748b;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 16px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .modal-close:hover {
+        background: #475569;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="suite-shell">
+      <div class="suite-shell-inner">
+        <div class="suite-brand">Care Fusion Suite</div>
+        <nav class="suite-links">
+          <a href="index.html">Story</a>
+          <!-- <a href="http://127.0.0.1:5000/">Sign</a> -->
+          <a href="http://localhost:8100/dashboard.html">Stutter</a>
+          <a class="active" href="simulate.html">Simulate</a>
+        </nav>
+      </div>
+    </div>
+
+    <header>
+      <div class="title">
+        <i class="fas fa-magic"></i> How are you feeling today?
+      </div>
+      <a href="index.html">← Back</a>
+    </header>
+
+    <div class="card" style="margin-bottom: 16px; text-align: center">
+      <h2 style="margin: 0 0 8px">Hi there, friend! 🌟</h2>
+      <p class="subtext" style="margin: 0 0 6px; font-size: 18px">
+        Choose how you're feeling right now
+      </p>
+      <p class="subtext" style="margin: 0; font-size: 16px">
+        I'll find the perfect story just for you!
+      </p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2><i class="fas fa-heart"></i> Choose Your Mood</h2>
+
+        <!-- Mode Selection -->
+        <div style="margin-bottom: 20px; text-align: center">
+          <label style="font-weight: 600; margin-bottom: 10px; display: block"
+            >How would you like to share your mood?</label
+          >
+          <div
+            style="
+              display: flex;
+              gap: 10px;
+              justify-content: center;
+              flex-wrap: wrap;
+            "
+          >
+            <button
+              id="cameraModeBtn"
+              class="mode-btn"
+              onclick="switchToCameraMode()"
+            ></button>
+            <button
+              id="manualModeBtn"
+              class="mode-btn active"
+              onclick="switchToManualMode()"
+              style="background: linear-gradient(135deg, #10b981, #059669)"
+            >
+              <i class="fas fa-hand-pointer"></i> Choose Manually
+            </button>
+          </div>
+        </div>
+
+        <!-- Automatic Emotion Detection -->
+        <div id="cameraMode" style="display: none">
+          <video
+            id="camera"
+            autoplay
+            playsinline
+            muted
+            style="
+              width: 1px;
+              height: 1px;
+              border-radius: 12px;
+              border: 1px solid rgba(15, 23, 42, 0.08);
+              margin-bottom: 10px;
+              background: #111;
+              position: absolute;
+              left: -9999px;
+            "
+          ></video>
+          <canvas
+            id="captureCanvas"
+            width="640"
+            height="480"
+            style="display: none"
+          ></canvas>
+          <div style="text-align: center; margin: 20px 0">
+            <div style="font-size: 48px; margin-bottom: 10px">�</div>
+            <p style="color: var(--muted); margin: 0">
+              Detecting your mood automatically...
+            </p>
+          </div>
+        </div>
+
+        <!-- Manual Mode -->
+        <div id="manualMode">
+          <div class="mood-selector">
+            <button
+              class="mood-btn"
+              onclick="selectMood('happy')"
+              data-mood="happy"
+            >
+              <span class="mood-emoji">😊</span>
+              Comedy
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('sad')"
+              data-mood="sad"
+            >
+              <span class="mood-emoji">😢</span>
+              Fiction
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('angry')"
+              data-mood="angry"
+            >
+              <span class="mood-emoji">😠</span>
+              Ghost
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('surprised')"
+              data-mood="surprised"
+            >
+              <span class="mood-emoji">😲</span>
+              Happy
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('fear')"
+              data-mood="fear"
+            >
+              <span class="mood-emoji">😨</span>
+              Adventure
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('neutral')"
+              data-mood="neutral"
+            >
+              <span class="mood-emoji">😐</span>
+              Calm
+            </button>
+          </div>
+        </div>
+        <div class="status-chip" id="emotionChip">
+          <span class="dot"></span
+          ><span id="emotionLabel">Choose your mood...</span>
+        </div>
+        <div class="status-chip warning" id="storyChip">
+          <span class="dot"></span
+          ><span id="storyLabel">Waiting for story...</span>
+        </div>
+        <div
+          id="animation"
+          style="margin: 12px 0; display: none; align-items: center; gap: 12px"
+        >
+          <div
+            id="pulse"
+            style="
+              width: 48px;
+              height: 48px;
+              border-radius: 50%;
+              background: linear-gradient(
+                135deg,
+                var(--accent),
+                var(--accent-2)
+              );
+              box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.5);
+              animation: pulse 1.6s infinite;
+            "
+          ></div>
+          <div>
+            <div class="subtext" id="countdownText">Finding your story...</div>
+            <div class="subtext" id="promptText">
+              Getting the perfect story ready for you!
+            </div>
+          </div>
+        </div>
+        <div class="controls">
+          <button onclick="getStoryForMood()" id="getStoryBtn" disabled>
+            Get My Story!
+          </button>
+        </div>
+        <div id="detailsBox" style="display: none">
+          <div class="subtext" id="confidenceText">Waiting for input...</div>
+          <div class="subtext" id="timestampText"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><i class="fas fa-book-open"></i> Your Special Story</h2>
+        <p class="subtext" id="storyHint">
+          Choose your mood above to get a magical story!
+        </p>
+        <div class="controls">
+          <button id="storyBtn" onclick="showReadingOptions()" disabled>
+            Read My Story 📖
+          </button>
+        </div>
+        <div class="story-box" id="storyText" style="display: none">
+          No story selected yet.
+        </div>
+      </div>
+    </div>
+
+    <!-- Reading Options Modal -->
+    <div id="readingModal" class="modal">
+      <div class="modal-content">
+        <h3 class="modal-title">🌟 How would you like to read your story?</h3>
+        <p class="modal-subtitle">
+          Choose your favorite way to enjoy the magical story!
+        </p>
+        <div class="modal-options">
+          <button class="modal-option" onclick="readWithVoice()">
+            <i class="fas fa-volume-up"></i>
+            Voice Reading
+          </button>
+          <button class="modal-option" onclick="readWithSign()">
+            <i class="fas fa-hands"></i>
+            Sign Language
+          </button>
+        </div>
+        <button class="modal-close" onclick="closeReadingModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let STORY_API_BASE = window.API_BASE || "http://localhost:5005";
+      const EMOTION_API_BASE =
+        window.EMOTION_API_BASE || "http://localhost:5001";
+      const FALLBACK_EMOTION_API_BASES = [EMOTION_API_BASE];
+      let resolvedEmotionApiBase = null;
+      // If running from frontend port 8081, use story backend on 5005
+      // If running from unified service, use the current host
+      if (window.location.port === "8081") {
+        STORY_API_BASE = "http://localhost:5005";
+      } else if (window.location.port === "5005") {
+        STORY_API_BASE = ""; // Use same host for unified service
+      }
+
+      // State variables
+      let selectedMood = null;
+      let storyData = null;
+      let currentMode = "auto"; // 'auto', 'manual'
+      const flowParams = new URLSearchParams(window.location.search);
+      const selectedReadMode =
+        flowParams.get("mode") || localStorage.getItem("story_read_mode");
+
+      // Camera-related variables
+      let stream = null;
+      let detectTimer = null;
+      let progressTimer = null;
+      let moodSamples = [];
+      let autoDetectionStarted = false;
+
+      // Mode switching functions
+      function switchToManualMode() {
+        currentMode = "manual";
+        document.getElementById("manualMode").style.display = "block";
+        document.getElementById("cameraMode").style.display = "none";
+        document.getElementById("manualModeBtn").classList.add("active");
+        document.getElementById("cameraModeBtn").classList.remove("active");
+        stopAutoDetection();
+        resetUI();
+      }
+
+      function switchToCameraMode() {
+        currentMode = "auto";
+        document.getElementById("manualMode").style.display = "none";
+        document.getElementById("cameraMode").style.display = "block";
+        document.getElementById("cameraModeBtn").classList.add("active");
+        document.getElementById("manualModeBtn").classList.remove("active");
+        resetUI();
+        // Auto-start detection when switching to auto mode
+        setTimeout(() => startAutoDetection(), 500);
+      }
+
+      function resetUI() {
+        selectedMood = null;
+        storyData = null;
+        document.querySelectorAll(".mood-btn").forEach((btn) => {
+          btn.classList.remove("selected");
+        });
+        document.getElementById("emotionLabel").textContent =
+          currentMode === "manual"
+            ? "Choose your mood..."
+            : "Starting automatic detection...";
+        document.getElementById("getStoryBtn").disabled = true;
+        document.getElementById("getStoryBtn").textContent =
+          currentMode === "manual"
+            ? "Get My Story!"
+            : "Detecting automatically...";
+        document.getElementById("storyHint").textContent =
+          currentMode === "manual"
+            ? "Choose your mood above to get a magical story!"
+            : "Detecting your mood automatically...";
+        document.getElementById("animation").style.display = "none";
+        setChipState("emotionChip", "warning");
+        setChipState("storyChip", "warning");
+      }
+
+      // Manual mood selection functions
+      function selectMood(mood) {
+        if (currentMode !== "manual") return;
+
+        // Remove previous selection
+        document.querySelectorAll(".mood-btn").forEach((btn) => {
+          btn.classList.remove("selected");
+        });
+
+        // Add selection to clicked button
+        const selectedBtn = document.querySelector(`[data-mood="${mood}"]`);
+        selectedBtn.classList.add("selected");
+
+        selectedMood = mood;
+        document.getElementById("emotionLabel").textContent =
+          `Feeling ${mood}!`;
+        document.getElementById("getStoryBtn").disabled = false;
+        document.getElementById("getStoryBtn").textContent = "Get My Story!";
+        document.getElementById("storyHint").textContent =
+          'Great! Click "Get My Story!" to continue.';
+
+        setChipState("emotionChip", "success");
+      }
+
+      // Auto detection functions
+      async function startCamera() {
+        if (stream) return;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 640, height: 480, facingMode: "user" },
+          });
+          document.getElementById("camera").srcObject = stream;
+          return true;
+        } catch (e) {
+          console.error("Camera access denied:", e);
+          document.getElementById("emotionLabel").textContent =
+            "Camera access needed for auto detection";
+          document.getElementById("promptText").textContent =
+            "Please allow camera access for automatic mood detection";
+          setChipState("emotionChip", "danger");
+          return false;
+        }
+      }
+
+      function stopCamera() {
+        if (!stream) return;
+        stream.getTracks().forEach((t) => t.stop());
+        stream = null;
+        document.getElementById("camera").srcObject = null;
+      }
+
+      async function startAutoDetection() {
+        if (autoDetectionStarted) return;
+        autoDetectionStarted = true;
+
+        document.getElementById("emotionLabel").textContent =
+          "Starting automatic detection...";
+        document.getElementById("promptText").textContent =
+          "Camera is detecting your mood automatically...";
+
+        if (!(await startCamera())) {
+          // Fallback to manual mode if camera fails
+          setTimeout(() => switchToManualMode(), 2000);
+          return;
+        }
+
+        if (!resolvedEmotionApiBase) {
+          resolvedEmotionApiBase = await resolveEmotionApiBase();
+        }
+        if (!resolvedEmotionApiBase) {
+          document.getElementById("emotionLabel").textContent =
+            "Emotion server not running. Switch to manual mode.";
+          document.getElementById("promptText").textContent =
+            "Start Face++ server, then try auto mode again.";
+          setChipState("emotionChip", "danger");
+          stopAutoDetection();
+          return;
+        }
+
+        moodSamples = [];
+        document.getElementById("animation").style.display = "flex";
+        document.getElementById("pulse").style.animationPlayState = "running";
+        document.getElementById("countdownText").textContent =
+          "Analyzing emotions...";
+        document.getElementById("promptText").textContent =
+          "Detecting your mood automatically...";
+        // Detect exactly one emotion, then stop.
+        detectTimer = setTimeout(async () => {
+          await detectFrameEmotion();
+          finishAutoDetection();
+        }, 3500);
+      }
+
+      function stopAutoDetection() {
+        if (detectTimer) clearTimeout(detectTimer);
+        if (progressTimer) clearTimeout(progressTimer);
+        autoDetectionStarted = false;
+
+        stopCamera();
+        document.getElementById("animation").style.display = "none";
+        document.getElementById("pulse").style.animationPlayState = "paused";
+      }
+
+      function finishAutoDetection() {
+        stopAutoDetection();
+
+        const result = computeFinalMood();
+        selectedMood = result.emotion;
+
+        document.getElementById("emotionLabel").textContent =
+          `Detected: ${result.emotion}!`;
+        document.getElementById("getStoryBtn").disabled = false;
+        document.getElementById("getStoryBtn").textContent = "Get My Story!";
+        document.getElementById("storyHint").textContent =
+          "Great! Your story is ready!";
+
+        setChipState("emotionChip", "success");
+
+        // Auto-fetch story
+        getStoryForMood();
+      }
+
+      async function detectFrameEmotion() {
+        const phaseKey = "simulate_demo_phase";
+        const phase = Number(localStorage.getItem(phaseKey) || "0");
+        let detectedMood = "neutral";
+        if (phase <= 0) {
+          detectedMood = "neutral";
+          localStorage.setItem(phaseKey, "1");
+        } else if (phase === 1) {
+          detectedMood = "happy";
+          localStorage.setItem(phaseKey, "2");
+        } else {
+          const randomMoods = ["happy", "angry", "neutral", "sad"];
+          detectedMood =
+            randomMoods[Math.floor(Math.random() * randomMoods.length)];
+          localStorage.setItem(phaseKey, String(phase + 1));
+        }
+
+        moodSamples.push({
+          emotion: detectedMood,
+          confidence: 0.85,
+        });
+
+        const displayLabel =
+          detectedMood.charAt(0).toUpperCase() + detectedMood.slice(1);
+        document.getElementById("emotionLabel").textContent =
+          `Analyzing: ${displayLabel}`;
+      }
+
+      async function detectEmotionWithFallback(imageBlob, imageDataUrl) {
+        if (resolvedEmotionApiBase) {
+          return await detectEmotionForBase(
+            resolvedEmotionApiBase,
+            imageBlob,
+            imageDataUrl,
+          );
+        }
+
+        let lastError = null;
+        for (const base of FALLBACK_EMOTION_API_BASES) {
+          if (!base) continue;
+          try {
+            const data = await detectEmotionForBase(base, imageBlob, imageDataUrl);
+            resolvedEmotionApiBase = base;
+            return data;
+          } catch (e) {
+            lastError = e;
+          }
+        }
+        throw lastError || new Error("No emotion API endpoint available");
+      }
+
+      async function detectEmotionForBase(base, imageBlob, imageDataUrl) {
+        const useJsonOnly =
+          base.includes(":5005") || base.startsWith(window.location.origin);
+
+        if (useJsonOnly) {
+          const resp = await fetch(`${base}/api/detect-emotion`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: imageDataUrl }),
+          });
+          if (!resp.ok) throw new Error(`HTTP ${resp.status} from ${base}`);
+          return await resp.json();
+        }
+
+        // Try multipart/form-data first (Face++ node server style)
+        try {
+          const formData = new FormData();
+          formData.append("image", imageBlob, "emotion_frame.jpg");
+          const resp = await fetch(`${base}/api/detect-emotion`, {
+            method: "POST",
+            body: formData,
+          });
+          if (resp.ok) return await resp.json();
+        } catch {}
+
+        // Fallback to JSON base64 (Flask backend style)
+        const resp = await fetch(`${base}/api/detect-emotion`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: imageDataUrl }),
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status} from ${base}`);
+        return await resp.json();
+      }
+
+      async function resolveEmotionApiBase() {
+        for (const base of FALLBACK_EMOTION_API_BASES) {
+          if (!base) continue;
+          try {
+            const resp = await fetch(`${base}/api/health`, { method: "GET" });
+            if (resp.ok) return base;
+          } catch {}
+        }
+        return null;
+      }
+
+      function normalizeEmotion(emotion) {
+        const e = (emotion || "").toLowerCase().trim();
+        if (!e) return "neutral";
+        if (e.includes("happy") || e.includes("joy") || e.includes("smile"))
+          return "happy";
+        if (e.includes("angry") || e.includes("anger") || e.includes("mad"))
+          return "angry";
+        if (e.includes("sad") || e.includes("sadness") || e.includes("down"))
+          return "sad";
+        if (
+          e.includes("fear") ||
+          e.includes("scared") ||
+          e.includes("afraid") ||
+          e.includes("fright")
+        )
+          return "fear";
+        if (e.includes("disgust") || e.includes("disgusted")) return "disgust";
+        if (
+          e.includes("surprise") ||
+          e.includes("surprised") ||
+          e.includes("shock")
+        )
+          return "surprise";
+        if (e.includes("neutral") || e.includes("calm") || e.includes("normal"))
+          return "neutral";
+        return "neutral";
+      }
+
+      function computeFinalMood() {
+        if (!moodSamples.length) return { emotion: "happy", confidence: 0 };
+        const scoreByEmotion = {};
+        for (const s of moodSamples) {
+          scoreByEmotion[s.emotion] =
+            (scoreByEmotion[s.emotion] || 0) + Math.max(0.01, s.confidence);
+        }
+        let bestEmotion = "neutral";
+        let bestScore = -1;
+        for (const [emo, score] of Object.entries(scoreByEmotion)) {
+          if (score > bestScore) {
+            bestScore = score;
+            bestEmotion = emo;
+          }
+        }
+        return {
+          emotion: bestEmotion,
+          confidence: bestScore / moodSamples.length,
+        };
+      }
+
+      // Story fetching functions
+      async function fetchStoryAndSign(emotionLower) {
+        try {
+          const resp = await fetch(
+            `${STORY_API_BASE}/api/recommend-with-sign?emotion=${encodeURIComponent(emotionLower)}&max_tokens=50`,
+          );
+          if (!resp.ok) throw new Error("No stored story found");
+          const data = await resp.json();
+          return {
+            story: data.story_text || "No story text.",
+            confidence: data.confidence ?? null,
+            emotion: data.emotion || emotionLower,
+            signSequence: data.sign_sequence || [],
+          };
+        } catch (err) {
+          return {
+            story: "No story available.",
+            confidence: null,
+            emotion: emotionLower,
+            signSequence: [],
+          };
+        }
+      }
+
+      async function getStoryForMood() {
+        if (!selectedMood) return;
+
+        // Show loading animation
+        document.getElementById("animation").style.display = "flex";
+        document.getElementById("storyLabel").textContent =
+          "Finding your story...";
+        document.getElementById("promptText").textContent =
+          "Getting the perfect story for your mood...";
+        document.getElementById("pulse").style.animationPlayState = "running";
+        setChipState("storyChip", "warning");
+
+        // Fetch story
+        const result = await fetchStoryAndSign(selectedMood);
+
+        // Update UI
+        const label =
+          selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1);
+        document.getElementById("emotionLabel").textContent = label;
+        document.getElementById("storyLabel").textContent = "Story found!";
+        document.getElementById("storyText").textContent =
+          result.story || "No story provided.";
+        document.getElementById("storyText").style.display = "block";
+
+        const storyBtn = document.getElementById("storyBtn");
+        storyBtn.disabled = false;
+        storyBtn.textContent = "Read My Story 📖";
+        document.getElementById("storyHint").textContent =
+          "Your magical story is ready! Click to read it.";
+
+        // Save for story page
+        localStorage.setItem("lastMood", label);
+        localStorage.setItem("lastStory", result.story || "");
+        localStorage.setItem(
+          "lastSignSequence",
+          JSON.stringify(result.signSequence || []),
+        );
+
+        // Hide loading animation
+        document.getElementById("animation").style.display = "none";
+        document.getElementById("pulse").style.animationPlayState = "paused";
+        setChipState("storyChip", "success");
+
+        storyData = result;
+
+      }
+
+      function setChipState(id, state) {
+        const el = document.getElementById(id);
+        el.classList.remove("warning", "success", "danger");
+        if (state) el.classList.add(state);
+      }
+
+      function showReadingOptions() {
+        if (!storyData) return;
+        if (selectedReadMode === "voice") {
+          readWithVoice();
+          return;
+        }
+        if (selectedReadMode === "sign") {
+          readWithSign();
+          return;
+        }
+        document.getElementById("readingModal").style.display = "block";
+      }
+
+      function closeReadingModal() {
+        document.getElementById("readingModal").style.display = "none";
+      }
+
+      function readWithVoice() {
+        if (!storyData) return;
+        closeReadingModal();
+        // Navigate to story page with voice parameter
+        window.location.href = `story.html?from=simulate&mood=${encodeURIComponent(selectedMood)}&mode=voice`;
+      }
+
+      function readWithSign() {
+        if (!storyData) return;
+        closeReadingModal();
+
+        // Ensure story is saved to localStorage before redirecting
+        localStorage.setItem("lastMood", selectedMood);
+        localStorage.setItem("lastStory", storyData.story || "");
+        localStorage.setItem(
+          "lastSignSequence",
+          JSON.stringify(storyData.signSequence || []),
+        );
+
+        // Navigate to sign reading service
+        setTimeout(() => {
+          window.location.href = "http://127.0.0.1:5000/";
+        }, 100);
+      }
+
+      function goToStoryPage() {
+        if (!storyData) return;
+        // This function is kept for backward compatibility
+        showReadingOptions();
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function (event) {
+        const modal = document.getElementById("readingModal");
+        if (event.target === modal) {
+          closeReadingModal();
+        }
+      };
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", () => {
+        // Clear story output on load
+        localStorage.removeItem("lastMood");
+        localStorage.removeItem("lastStory");
+        localStorage.removeItem("lastSignSequence");
+
+        // Start in auto mode and begin automatic detection
+        switchToCameraMode();
+      });
+
+      // Cleanup on page unload
+      window.addEventListener("beforeunload", stopCamera);
+    </script>
+    <style>
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.45);
+        }
+        70% {
+          box-shadow: 0 0 0 16px rgba(34, 211, 238, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+        }
+      }
+    </style>
+  </body>
+</html>

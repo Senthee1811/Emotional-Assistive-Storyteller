@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StoryPal | Sign Language Studio</title>
+    <meta
+      name="description"
+      content="An accessible story page designed for blind and deaf children with screen reader support, sign language, and child-friendly interface."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Fredoka:wght@400;600;700&family=Nunito:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='sign.css') }}"
+    />
+  </head>
+  <body>
+    <div class="float-shape shape-a"></div>
+    <div class="float-shape shape-b"></div>
+    <div class="float-shape shape-c"></div>
+
+    <main class="page">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-dot">🤟</div>
+          StoryPal Signs
+        </div>
+        <nav class="nav">
+          <a href="http://localhost:8080/index.html">📖 Home</a>
+          <a href="http://localhost:8080/recommend.html">📚 Stories</a>
+          <a href="http://localhost:8080/upload.html">📤 Upload</a>
+          <a href="http://localhost:8080/label.html">🧠 Teach</a>
+          <a class="active" href="http://127.0.0.1:5000/">🤟 Signs</a>
+          <a href="http://localhost:8100/dashboard.html">🗣️ Stutter</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <div>
+          <h1>Sign Language Magic Studio!</h1>
+          <p>
+            Turn words into beautiful sign language animations for everyone to
+            understand!
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="http://localhost:8080/index.html"
+              >📖 Back to Stories</a
+            >
+            <a
+              class="btn btn-secondary"
+              href="http://localhost:8080/simulate.html"
+              >😊 Mood Detection</a
+            >
+          </div>
+        </div>
+        <div class="mascot-wrap">
+          <div class="cloud c1"></div>
+          <div class="cloud c2"></div>
+          <div class="mascot">
+            <div class="eye left"></div>
+            <div class="eye right"></div>
+            <div class="smile"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <label for="sign-input">Input text</label>
+        <textarea
+          id="sign-input"
+          placeholder="hello, thank you, good morning"
+        ></textarea>
+        <div class="actions">
+          <button id="predict-btn" type="button">Predict Signs</button>
+          <button id="labels-btn" class="ghost" type="button">
+            Load Labels
+          </button>
+          <button id="clear-btn" class="ghost" type="button">Clear</button>
+          <button id="read-last-story-btn" class="ghost" type="button">
+            📖 Read Last Story
+          </button>
+        </div>
+        <p id="status" class="status">Ready.</p>
+      </section>
+
+      <!-- Story Display Section -->
+      <section class="panel" id="story-panel" style="display: none">
+        <div class="section-head">
+          <h2>Recommended Story</h2>
+          <span id="story-mood" class="badge">Happy</span>
+        </div>
+        <div id="story-text" class="story-text"></div>
+        <div class="actions">
+          <button id="play-story-btn" type="button">
+            Play Signs for Story
+          </button>
+        </div>
+      </section>
+
+      <section class="panel hidden" id="predictions-panel">
+        <div class="section-head">
+          <h2>Predictions</h2>
+          <span id="result-count" class="badge">0</span>
+        </div>
+        <div id="results" class="cards"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Sign Player</h2>
+          <span id="now-playing" class="badge">Idle</span>
+        </div>
+        <div class="tuning-grid">
+          <label class="tuning-item" for="speed-range">
+            <span>Speed</span>
+            <input
+              id="speed-range"
+              type="range"
+              min="0.15"
+              max="0.9"
+              step="0.01"
+              value="0.38"
+            />
+            <strong id="speed-value">0.38</strong>
+          </label>
+          <label class="tuning-item" for="smooth-range">
+            <span>Smoothness</span>
+            <input
+              id="smooth-range"
+              type="range"
+              min="0.35"
+              max="0.95"
+              step="0.01"
+              value="0.74"
+            />
+            <strong id="smooth-value">0.74</strong>
+          </label>
+          <label class="tuning-item" for="blend-range">
+            <span>Transition Blend</span>
+            <input
+              id="blend-range"
+              type="range"
+              min="4"
+              max="24"
+              step="1"
+              value="12"
+            />
+            <strong id="blend-value">12</strong>
+          </label>
+        </div>
+        <canvas
+          id="player-canvas"
+          class="sign-canvas"
+          width="760"
+          height="320"
+        ></canvas>
+        <div class="actions">
+          <button id="play-btn" type="button">Play</button>
+          <button id="pause-btn" class="ghost" type="button">
+            Pause/Resume
+          </button>
+          <button id="restart-btn" class="ghost" type="button">
+            Restart Sign
+          </button>
+          <button id="next-btn" class="ghost" type="button">Next Sign</button>
+          <button id="stop-btn" class="ghost" type="button">Stop</button>
+        </div>
+        <p class="status">
+          Keyboard: <strong>q / Esc</strong> stop,
+          <strong>p</strong> pause/resume, <strong>r</strong> restart,
+          <strong>n</strong> next.
+        </p>
+        <p id="player-log" class="status">No sequence loaded.</p>
+        <pre id="terminal-log" class="terminal-log">Terminal log ready.</pre>
+      </section>
+    </main>
+    <script src="../static/sign.js"></script>
+  </body>
+</html>

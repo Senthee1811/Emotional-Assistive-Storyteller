@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Story - Accessible for All Children</title>
+  <meta
+    name="description"
+    content="An accessible story page designed for blind and deaf children with screen reader support, sign language, and child-friendly interface."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Comic+Neue:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <style>
+    :root {
+      --bg: #f0f8ff;
+      --panel: #ffffff;
+      --muted: #4b5563;
+      --text: #0f172a;
+      --accent: #4f8bff;
+      --accent-2: #ff5fa2;
+      --accent-3: #10b981;
+      --radius: 18px;
+      --shadow: 0 18px 48px rgba(15, 23, 42, 0.15);
+      --font-size-large: clamp(18px, 4vw, 24px);
+      --font-size-xlarge: clamp(24px, 5vw, 32px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    @media (prefers-contrast: high) {
+      :root {
+        --bg: #ffffff;
+        --panel: #000000;
+        --text: #000000;
+        --accent: #0000ff;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: "Comic Neue", "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: var(--font-size-large);
+      background:
+        radial-gradient(circle at 10% 20%, rgba(79, 139, 255, 0.18), transparent 32%),
+        radial-gradient(circle at 90% 10%, rgba(255, 95, 162, 0.22), transparent 30%),
+        radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.20), transparent 38%),
+        linear-gradient(180deg, #f9fbff 0%, #f3f6ff 50%, #f0f8ff 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      line-height: 1.6;
+    }
+
+    .suite-shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .suite-shell-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      padding: 10px 12px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .suite-brand {
+      font-weight: 800;
+      color: #0f3d58;
+      font-size: 1.1rem;
+    }
+
+    .suite-links {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .suite-links a {
+      color: #0f3d58;
+      text-decoration: none;
+      font-weight: 700;
+      background: #fff;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 10px;
+      padding: 7px 10px;
+    }
+
+    .suite-links a.active {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, #5aa7ff, #4b87ff);
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: var(--font-size-xlarge);
+      font-weight: 700;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: clamp(20px, 4vw, 26px);
+      font-weight: 600;
+    }
+
+    .accessibility-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      z-index: 1000;
+      border: 2px solid var(--accent);
+    }
+
+    .accessibility-controls h3 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      color: var(--text);
+    }
+
+    .control-group {
+      margin-bottom: 12px;
+    }
+
+    .control-group label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .toggle-button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-button:hover {
+      background: var(--accent-2);
+      transform: scale(1.05);
+    }
+
+    .toggle-button.active {
+      background: var(--accent-3);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(79, 139, 255, 0.14);
+      color: #194c8f;
+      border: 1px solid rgba(79, 139, 255, 0.35);
+      font-weight: 700;
+    }
+
+    .story-box {
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 20px;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      min-height: 200px;
+      font-size: var(--font-size-large);
+      position: relative;
+    }
+
+    body.large-text .story-box {
+      font-size: clamp(24px, 5vw, 32px);
+      padding: 30px;
+    }
+
+    body.high-contrast .story-box {
+      background: #000000;
+      color: #ffffff;
+      border-color: #ffffff;
+    }
+
+    *:focus {
+      outline: 3px solid var(--accent-3);
+      outline-offset: 2px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    button {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(79, 139, 255, 0.25);
+      margin-right: 8px;
+      margin-bottom: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(79, 139, 255, 0.35);
+    }
+
+    button:focus {
+      outline: 3px solid var(--accent-3);
+      outline-offset: 2px;
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    body.large-text button {
+      padding: 16px 24px;
+      font-size: 20px;
+      margin: 12px;
+    }
+
+    body.high-contrast button {
+      background: #000000;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+    }
+
+    .visual-indicator {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--accent-3);
+      color: white;
+      padding: 20px 40px;
+      border-radius: var(--radius);
+      font-size: 24px;
+      font-weight: 700;
+      z-index: 2000;
+      display: none;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    #signCanvas {
+      border: 3px solid var(--accent);
+      border-radius: 12px;
+      background: #111827;
+    }
+
+    body.high-contrast #signCanvas {
+      border-color: #ffffff;
+      background: #000000;
+    }
+
+    .subtext {
+      color: var(--muted);
+    }
+
+    .status-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .error-text {
+      color: #dc2626;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="accessibility-controls" role="region" aria-label="Accessibility Controls">
+    <h3><i class="fas fa-universal-access"></i> Accessibility</h3>
+
+    <div class="control-group">
+      <label for="textSizeToggle">Text Size:</label>
+      <button id="textSizeToggle" class="toggle-button" onclick="toggleTextSize()" aria-label="Toggle large text mode">
+        <i class="fas fa-text-height"></i> Large Text
+      </button>
+    </div>
+
+    <div class="control-group">
+      <label for="contrastToggle">Contrast:</label>
+      <button id="contrastToggle" class="toggle-button" onclick="toggleContrast()" aria-label="Toggle high contrast mode">
+        <i class="fas fa-adjust"></i> High Contrast
+      </button>
+    </div>
+
+    <div class="control-group">
+      <label for="speedToggle">Reading Speed:</label>
+      <button id="speedToggle" class="toggle-button" onclick="toggleSpeed()" aria-label="Toggle reading speed">
+        <i class="fas fa-tachometer-alt"></i> <span id="speedText">Normal</span>
+      </button>
+    </div>
+
+    <div class="control-group">
+      <label for="visualToggle">Visual Feedback:</label>
+      <button id="visualToggle" class="toggle-button" onclick="toggleVisual()" aria-label="Toggle visual feedback for deaf children">
+        <i class="fas fa-eye"></i> Visual Alerts
+      </button>
+    </div>
+  </div>
+
+  <div id="visualIndicator" class="visual-indicator" role="alert" aria-live="polite">
+    <span id="visualText">Story Starting!</span>
+  </div>
+
+  <div class="suite-shell">
+    <div class="suite-shell-inner">
+      <div class="suite-brand">Care Fusion Suite</div>
+      <nav class="suite-links">
+        <a href="index.html">Story</a>
+        <a href="http://localhost:5001/sign">Sign</a>
+        <a href="http://localhost:8100/dashboard.html">Stutter</a>
+        <a class="active" href="story.html">Story View</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- <div class="card">
+    <h1>Your story</h1>
+    <div class="pill" id="moodTag">Mood: --</div>
+    <p class="subtext" id="welcome">Here’s a story picked just for you.</p>
+  </div> -->
+
+  <div class="card">
+    <h2><i class="fas fa-star"></i> Your Amazing Story</h2>
+    <div class="story-box" id="storyBox" role="region" aria-label="Story content" tabindex="0">
+      No story saved yet. Go back and start the mood check to get your magical story!
+    </div>
+
+    <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <label style="display:flex;align-items:center;gap:8px; font-weight: 600;">
+        <i class="fas fa-microphone"></i> Voice Choice:
+        <select id="voicePool" style="border-radius:12px;padding:8px; font-size: 16px;" aria-label="Select voice pool">
+          <option value="male">Male Voice</option>
+          <option value="female">Female Voice</option>
+          <option value="mixed">Mixed Voices</option>
+        </select>
+      </label>
+
+      <button type="button" onclick="generateAndPlayStory()" aria-label="Generate and play story audio with Coqui">
+        <i class="fas fa-play"></i> Generate + Play Story
+      </button>
+
+      <button type="button" onclick="stopAudio()" aria-label="Stop audio playback">
+        <i class="fas fa-stop"></i> Stop Audio
+      </button>
+
+      <button type="button" onclick="readStory()" aria-label="Read story with Coqui voice">
+        <i class="fas fa-book-reader"></i> Read Aloud
+      </button>
+    </div>
+
+    <div id="voiceFeedback" style="margin-top: 14px; display:none; gap: 10px; flex-wrap: wrap;" role="region" aria-label="Voice feedback">
+      <div id="voiceInfo" style="font-weight:700;" role="status" aria-live="polite">Voice: --</div>
+      <span style="font-weight: 600;">Do you like this voice?</span>
+      <button type="button" onclick="handleFeedback(true)" aria-label="Keep this voice">
+        <i class="fas fa-thumbs-up"></i> Keep
+      </button>
+      <button type="button" onclick="handleFeedback(false)" aria-label="Change to different voice">
+        <i class="fas fa-thumbs-down"></i> Change
+      </button>
+    </div>
+
+    <div class="status-note" id="audioModeNote">
+      Audio mode: <strong>Coqui XTTS only</strong>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><i class="fas fa-hands"></i> Sign Language Story</h2>
+    <div class="story-box" id="signStatus" style="min-height:unset;margin-bottom:10px;" role="status" aria-live="polite">
+      No sign language story loaded yet.
+    </div>
+
+    <div style="position: relative;">
+      <canvas
+        id="signCanvas"
+        width="760"
+        height="300"
+        style="width:100%;border:3px solid var(--accent);border-radius:12px;background:#111827;"
+        role="img"
+        aria-label="Sign language animation canvas"
+      >
+        Your browser does not support the canvas element for sign language display.
+      </canvas>
+
+      <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 5px; font-size: 14px;">
+        <i class="fas fa-sign-language"></i> Sign Animation
+      </div>
+    </div>
+
+    <div style="margin-top:15px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <button type="button" onclick="playSign()" aria-label="Play sign language animation">
+        <i class="fas fa-play"></i> Play Signs
+      </button>
+      <button type="button" onclick="pauseSign()" aria-label="Pause or resume sign language animation">
+        <i class="fas fa-pause"></i> Pause/Resume
+      </button>
+      <button type="button" onclick="nextSign()" aria-label="Skip to next sign">
+        <i class="fas fa-forward"></i> Next Sign
+      </button>
+      <button type="button" onclick="stopSign()" aria-label="Stop sign language animation">
+        <i class="fas fa-stop"></i> Stop Signs
+      </button>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 20px;">
+    <button
+      type="button"
+      onclick="playBothVoiceAndSign()"
+      style="background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; border: none; border-radius: 15px; padding: 12px 20px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 22px rgba(31, 41, 55, 0.16);"
+      aria-label="Read story with Coqui voice and sign language"
+    >
+      <i class="fas fa-book-open"></i> Read My Story 📖
+    </button>
+
+    <button type="button" onclick="window.location.href='simulate.html'" style="background: var(--accent-3);" aria-label="Go back to previous page">
+      <i class="fas fa-arrow-left"></i> Back to Mood Check
+    </button>
+  </div>
+
+  <div id="announcements" class="sr-only" role="status" aria-live="assertive" aria-atomic="true"></div>
+
+  <script>
+    const lastMood = localStorage.getItem("lastMood");
+    const lastStory = localStorage.getItem("lastStory");
+
+    const EMOTION_API_BASE = window.API_BASE || "http://localhost:5005";
+    const TTS_API_BASE = `${EMOTION_API_BASE}/api`;
+
+    let signSequence = [];
+    try {
+      signSequence = JSON.parse(localStorage.getItem("lastSignSequence") || "[]");
+    } catch (_) {
+      signSequence = [];
+    }
+
+    let signTimer = null;
+    let signIndex = 0;
+    let frameCursor = 0;
+    let paused = false;
+
+    const DEFAULT_CHILD_ID = "child_001";
+    const DEFAULT_SESSION_ID = "story_001";
+
+    const childId = localStorage.getItem("tts_child_id") || DEFAULT_CHILD_ID;
+    const sessionId = localStorage.getItem("tts_session_id") || DEFAULT_SESSION_ID;
+
+    localStorage.setItem("tts_child_id", childId);
+    localStorage.setItem("tts_session_id", sessionId);
+
+    let currentVoicePool = "male";
+    let currentActorId = null;
+    let currentActorName = null;
+    let audioPlaylist = [];
+    let audioIndex = 0;
+    let currentAudio = null;
+    let isCoquiGenerating = false;
+
+    let largeTextEnabled = false;
+    let highContrastEnabled = false;
+    let readingSpeed = "normal";
+    let visualFeedbackEnabled = false;
+    let speechRate = 1.0;
+
+    function initializeAccessibility() {
+      largeTextEnabled = localStorage.getItem("largeText") === "true";
+      highContrastEnabled = localStorage.getItem("highContrast") === "true";
+      readingSpeed = localStorage.getItem("readingSpeed") || "normal";
+      visualFeedbackEnabled = localStorage.getItem("visualFeedback") === "true";
+
+      switch (readingSpeed) {
+        case "slow":
+          speechRate = 0.7;
+          break;
+        case "fast":
+          speechRate = 1.3;
+          break;
+        default:
+          speechRate = 1.0;
+      }
+
+      updateAccessibilityUI();
+      applyAccessibilitySettings();
+    }
+
+    function toggleTextSize() {
+      largeTextEnabled = !largeTextEnabled;
+      localStorage.setItem("largeText", largeTextEnabled);
+      applyAccessibilitySettings();
+      updateAccessibilityUI();
+      announceToScreenReader(largeTextEnabled ? "Large text enabled" : "Large text disabled");
+    }
+
+    function toggleContrast() {
+      highContrastEnabled = !highContrastEnabled;
+      localStorage.setItem("highContrast", highContrastEnabled);
+      applyAccessibilitySettings();
+      updateAccessibilityUI();
+      announceToScreenReader(highContrastEnabled ? "High contrast enabled" : "High contrast disabled");
+    }
+
+    function toggleSpeed() {
+      const speeds = ["slow", "normal", "fast"];
+      const currentIndex = speeds.indexOf(readingSpeed);
+      readingSpeed = speeds[(currentIndex + 1) % speeds.length];
+      localStorage.setItem("readingSpeed", readingSpeed);
+
+      switch (readingSpeed) {
+        case "slow":
+          speechRate = 0.7;
+          break;
+        case "fast":
+          speechRate = 1.3;
+          break;
+        default:
+          speechRate = 1.0;
+      }
+
+      updateAccessibilityUI();
+      announceToScreenReader(`Reading speed set to ${readingSpeed}`);
+    }
+
+    function toggleVisual() {
+      visualFeedbackEnabled = !visualFeedbackEnabled;
+      localStorage.setItem("visualFeedback", visualFeedbackEnabled);
+      updateAccessibilityUI();
+      announceToScreenReader(visualFeedbackEnabled ? "Visual feedback enabled" : "Visual feedback disabled");
+    }
+
+    function applyAccessibilitySettings() {
+      document.body.classList.toggle("large-text", largeTextEnabled);
+      document.body.classList.toggle("high-contrast", highContrastEnabled);
+    }
+
+    function updateAccessibilityUI() {
+      document.getElementById("textSizeToggle").classList.toggle("active", largeTextEnabled);
+      document.getElementById("contrastToggle").classList.toggle("active", highContrastEnabled);
+      document.getElementById("speedText").textContent = readingSpeed.charAt(0).toUpperCase() + readingSpeed.slice(1);
+      document.getElementById("visualToggle").classList.toggle("active", visualFeedbackEnabled);
+    }
+
+    function announceToScreenReader(message) {
+      const announcements = document.getElementById("announcements");
+      announcements.textContent = message;
+      setTimeout(() => {
+        announcements.textContent = "";
+      }, 1000);
+    }
+
+    function showVisualFeedback(message, duration = 2000) {
+      if (!visualFeedbackEnabled) return;
+
+      const indicator = document.getElementById("visualIndicator");
+      const text = document.getElementById("visualText");
+      text.textContent = message;
+      indicator.style.display = "block";
+
+      setTimeout(() => {
+        indicator.style.display = "none";
+      }, duration);
+    }
+
+    if (lastMood) {
+      document.getElementById("moodTag").textContent = "Mood: " + lastMood;
+      document.getElementById("welcome").textContent = "We felt you're " + String(lastMood).toLowerCase() + ". Enjoy this story!";
+    }
+
+    if (lastStory) {
+      document.getElementById("storyBox").textContent = lastStory || "Story text not provided.";
+    }
+
+    const voicePoolEl = document.getElementById("voicePool");
+    currentVoicePool = localStorage.getItem("voicePool") || "male";
+    voicePoolEl.value = currentVoicePool;
+
+    voicePoolEl.addEventListener("change", () => {
+      currentVoicePool = voicePoolEl.value;
+      localStorage.setItem("voicePool", currentVoicePool);
+    });
+
+    function setSignStatus(msg, isError = false) {
+      const el = document.getElementById("signStatus");
+      el.textContent = msg || "";
+      el.classList.toggle("error-text", !!isError);
+    }
+
+    function getBounds(frame) {
+      const all = [...(frame.pose || []), ...(frame.left || []), ...(frame.right || [])];
+      if (!all.length) return null;
+
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+
+      for (const [x, y] of all) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+
+      return { minX, minY, maxX, maxY };
+    }
+
+    function normalizePoint(point, bounds, w, h, pad = 24) {
+      if (!bounds) return [w / 2, h / 2];
+
+      const spanX = Math.max(bounds.maxX - bounds.minX, 1e-5);
+      const spanY = Math.max(bounds.maxY - bounds.minY, 1e-5);
+      const scale = Math.min((w - pad * 2) / spanX, (h - pad * 2) / spanY);
+      const nw = spanX * scale;
+      const nh = spanY * scale;
+      const ox = (w - nw) * 0.5;
+      const oy = (h - nh) * 0.5;
+
+      return [
+        (point[0] - bounds.minX) * scale + ox,
+        (point[1] - bounds.minY) * scale + oy
+      ];
+    }
+
+    function drawLinks(ctx, points, links, color, width) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+
+      for (const [a, b] of links) {
+        if (!points[a] || !points[b]) continue;
+        ctx.beginPath();
+        ctx.moveTo(points[a][0], points[a][1]);
+        ctx.lineTo(points[b][0], points[b][1]);
+        ctx.stroke();
+      }
+    }
+
+    function drawDots(ctx, points, color, radius) {
+      ctx.fillStyle = color;
+      for (const p of points) {
+        if (!p) continue;
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawFrame(frame) {
+      const canvas = document.getElementById("signCanvas");
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, "#0f172a");
+      bg.addColorStop(1, "#111827");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      if (!frame) return;
+
+      const bounds = getBounds(frame);
+      const pose = (frame.pose || []).map((p) => normalizePoint(p, bounds, w, h));
+      const left = (frame.left || []).map((p) => normalizePoint(p, bounds, w, h));
+      const right = (frame.right || []).map((p) => normalizePoint(p, bounds, w, h));
+
+      const poseLinks = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24]];
+      const handLinks = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],[0,17],[17,18],[18,19],[19,20]];
+
+      drawLinks(ctx, pose, poseLinks, "#93c5fd", 2.5);
+      drawLinks(ctx, left, handLinks, "#5eead4", 1.8);
+      drawLinks(ctx, right, handLinks, "#5eead4", 1.8);
+      drawDots(ctx, pose, "#e2e8f0", 2.0);
+      drawDots(ctx, left, "#5eead4", 1.6);
+      drawDots(ctx, right, "#5eead4", 1.6);
+    }
+
+    function normalizeAudioUrl(url) {
+      if (!url) return "";
+      if (url.startsWith("http://") || url.startsWith("https://")) return url;
+      if (url.startsWith("/")) return `${EMOTION_API_BASE}${url}`;
+      return `${EMOTION_API_BASE}/${url}`;
+    }
+
+    async function generateSignSequenceFromStory() {
+      const storyText = localStorage.getItem("lastStory") || "";
+      if (!storyText.trim()) {
+        console.error("No story text found for sign generation");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${EMOTION_API_BASE}/api/sign-story`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            text: storyText,
+            max_tokens: 50
+          })
+        });
+
+        const data = await res.json();
+        console.log("Sign response:", data);
+
+        signSequence = data.sequence || [];
+        localStorage.setItem("lastSignSequence", JSON.stringify(signSequence));
+
+        if (signSequence.length > 0) {
+          setSignStatus(`Generated ${signSequence.length} sign segments. Press Play.`);
+          announceToScreenReader(`${signSequence.length} sign language segments generated`);
+          drawFrame(signSequence[0].animation_frames?.[0] || null);
+        } else {
+          setSignStatus("No sign sequence generated for this story.");
+          announceToScreenReader("No sign language sequence available");
+        }
+      } catch (error) {
+        console.error("Error generating sign sequence:", error);
+        setSignStatus("Failed to generate sign sequence.", true);
+        announceToScreenReader("Sign generation failed. Please try again.");
+      }
+    }
+
+    async function generateAndPlayStory() {
+      const storyText = localStorage.getItem("lastStory") || "";
+      if (!storyText.trim()) {
+        alert("No story text found. Please go back and complete the mood check.");
+        return;
+      }
+
+      if (isCoquiGenerating) return;
+      isCoquiGenerating = true;
+
+      stopAudio();
+      currentActorId = null;
+      currentActorName = null;
+      document.getElementById("voiceFeedback").style.display = "none";
+      setSignStatus("Generating Coqui XTTS audio...");
+      announceToScreenReader("Generating Coqui voice for the story");
+      showVisualFeedback("Generating Voice... 🎤", 1500);
+
+      const payload = {
+        text: storyText,
+        child_id: childId,
+        session_id: sessionId,
+        gender: currentVoicePool,
+        child_friendly: true,
+        force_regenerate: true
+      };
+
+      try {
+        const res = await fetch(`${TTS_API_BASE}/process-story-xtts-multispeaker`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        console.log("XTTS response:", data);
+
+        if (!res.ok) {
+          console.error("XTTS failed:", data);
+          setSignStatus(`Coqui XTTS failed: ${data.error || "Unknown error"}`, true);
+          return;
+        }
+
+        if (!data.playlist || !Array.isArray(data.playlist) || data.playlist.length === 0) {
+          console.error("Empty XTTS playlist:", data);
+          setSignStatus("Coqui XTTS returned no audio.", true);
+          return;
+        }
+
+        localStorage.setItem("story_text", storyText);
+        localStorage.setItem("story_playlist", JSON.stringify(data.playlist));
+
+        audioPlaylist = data.playlist
+          .map((item) => {
+            const src = normalizeAudioUrl(item.audio_url);
+            console.log("Audio URL:", src);
+
+            const audio = new Audio(src);
+            audio.preload = "auto";
+            audio.dataset.sentence = item.sentence || "";
+            audio.onerror = (e) => {
+              console.error("Audio load failed:", src, e);
+            };
+
+            return audio;
+          })
+          .filter(Boolean);
+
+        if (!audioPlaylist.length) {
+          setSignStatus("Generated playlist is empty after processing.", true);
+          return;
+        }
+
+        audioIndex = 0;
+
+        const meta = data.playlist[0]?.meta || {};
+        currentActorId = meta.actor_id || null;
+        currentActorName = meta.actor_name || null;
+
+        if (currentActorName) {
+          document.getElementById("voiceInfo").textContent = `Voice: ${currentActorName} (pool: ${currentVoicePool})`;
+        } else {
+          document.getElementById("voiceInfo").textContent = `Voice pool: ${currentVoicePool}`;
+        }
+
+        document.getElementById("voiceFeedback").style.display = "flex";
+
+        await playAudio();
+      } catch (err) {
+        console.error("XTTS request failed:", err);
+        setSignStatus("Failed to generate Coqui XTTS audio. See console.", true);
+      } finally {
+        isCoquiGenerating = false;
+      }
+    }
+
+    async function handleFeedback(liked) {
+      if (!currentActorId) {
+        return;
+      }
+
+      setSignStatus(liked ? "Saving feedback..." : "Changing voice...");
+
+      try {
+        const res = await fetch(`${TTS_API_BASE}/feedback`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            child_id: childId,
+            session_id: sessionId,
+            actor_id: currentActorId,
+            liked
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.error(data);
+          setSignStatus("Feedback request failed. See console.", true);
+          return;
+        }
+
+        if (liked) {
+          setSignStatus("Thanks! We'll keep this voice.");
+        } else {
+          setSignStatus("Generating a new Coqui voice...");
+          await generateAndPlayStory();
+        }
+      } catch (err) {
+        console.error(err);
+        setSignStatus("Feedback request failed. See console.", true);
+      }
+    }
+
+    function readStory() {
+      generateAndPlayStory();
+    }
+
+    async function playAudio() {
+      if (!audioPlaylist.length) {
+        setSignStatus("No Coqui audio available.", true);
+        return;
+      }
+
+      if (audioIndex < 0 || audioIndex >= audioPlaylist.length) {
+        audioIndex = 0;
+      }
+
+      currentAudio = audioPlaylist[audioIndex];
+      if (!currentAudio) {
+        setSignStatus("Audio item missing.", true);
+        return;
+      }
+
+      currentAudio.onended = async () => {
+        audioIndex += 1;
+
+        if (audioIndex < audioPlaylist.length) {
+          await playAudio();
+        } else {
+          setSignStatus("Story playback complete.");
+          announceToScreenReader("Story playback complete");
+          showVisualFeedback("Story Complete! 🎉");
+          audioIndex = 0;
+          currentAudio = null;
+        }
+      };
+
+      currentAudio.onerror = (e) => {
+        console.error("Audio playback error:", e, currentAudio?.src);
+        setSignStatus("Audio playback failed.", true);
+      };
+
+      try {
+        await currentAudio.play();
+        setSignStatus(`Playing Coqui audio (${audioIndex + 1}/${audioPlaylist.length})`);
+        announceToScreenReader(`Playing sentence ${audioIndex + 1} of ${audioPlaylist.length}`);
+        showVisualFeedback(`Playing ${audioIndex + 1}/${audioPlaylist.length}`, 1200);
+      } catch (err) {
+        console.error("play() failed:", err);
+        setSignStatus("Browser blocked or failed Coqui audio playback.", true);
+      }
+    }
+
+    function stopAudio() {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+
+      audioPlaylist.forEach((audio) => {
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch (_) {}
+      });
+
+      currentAudio = null;
+      audioIndex = 0;
+      setSignStatus("Audio stopped.");
+    }
+
+    function stopSign() {
+      if (signTimer) clearInterval(signTimer);
+      signTimer = null;
+      signIndex = 0;
+      frameCursor = 0;
+      paused = false;
+      setSignStatus("Stopped.");
+      announceToScreenReader("Sign language animation stopped");
+      showVisualFeedback("Signs Stopped");
+    }
+
+    function playSign() {
+      if (!signSequence.length) {
+        setSignStatus("No sign sequence for this story.");
+        announceToScreenReader("No sign language sequence available");
+        return;
+      }
+
+      if (signTimer) clearInterval(signTimer);
+      paused = false;
+      announceToScreenReader("Playing sign language animation");
+      showVisualFeedback("Signs Playing! 👋");
+
+      signTimer = setInterval(() => {
+        if (paused) return;
+
+        const current = signSequence[signIndex];
+        const frames = current.animation_frames || [];
+
+        if (!frames.length) {
+          signIndex = (signIndex + 1) % signSequence.length;
+          frameCursor = 0;
+          return;
+        }
+
+        const idx = Math.floor(frameCursor) % frames.length;
+        drawFrame(frames[idx]);
+        frameCursor += 0.4;
+
+        const signText = current.resolved_label || current.input;
+        setSignStatus(`Playing: ${signText}`);
+
+        if (signIndex % 10 === 0) {
+          announceToScreenReader(`Now signing: ${signText}`);
+        }
+
+        if (frameCursor >= frames.length) {
+          frameCursor = 0;
+          signIndex = (signIndex + 1) % signSequence.length;
+        }
+      }, 16);
+    }
+
+    function pauseSign() {
+      paused = !paused;
+      const status = paused ? "Paused." : "Resumed.";
+      setSignStatus(status);
+      announceToScreenReader(`Sign animation ${paused ? "paused" : "resumed"}`);
+      showVisualFeedback(status);
+    }
+
+    async function playBothVoiceAndSign() {
+      announceToScreenReader("Starting story with Coqui voice and sign language.");
+
+      if ((localStorage.getItem("lastStory") || "").trim()) {
+        generateAndPlayStory();
+      }
+
+      if (signSequence.length > 0) {
+        setTimeout(() => {
+          playSign();
+          announceToScreenReader("Sign language animation started.");
+        }, 1000);
+      }
+    }
+
+    function nextSign() {
+      if (!signSequence.length) return;
+
+      signIndex = (signIndex + 1) % signSequence.length;
+      frameCursor = 0;
+      const signText = signSequence[signIndex].resolved_label || signSequence[signIndex].input;
+      setSignStatus(`Next: ${signText}`);
+      announceToScreenReader(`Next sign: ${signText}`);
+      showVisualFeedback("Next Sign ➡️");
+    }
+
+    if (signSequence.length) {
+      setSignStatus(`Loaded ${signSequence.length} sign segments. Press Play.`);
+      announceToScreenReader(`${signSequence.length} sign language segments loaded`);
+      drawFrame(signSequence[0].animation_frames?.[0] || null);
+    }
+
+    initializeAccessibility();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromSimulate = urlParams.get("from") === "simulate";
+    const mode = urlParams.get("mode");
+
+    if (fromSimulate && lastMood && lastStory) {
+      setTimeout(() => {
+        announceToScreenReader(`Story loaded for ${lastMood} mood. Starting ${mode} playback.`);
+
+        generateSignSequenceFromStory().then(() => {
+          if (mode === "voice" && lastStory.trim()) {
+            generateAndPlayStory();
+            announceToScreenReader("Coqui voice reading started automatically.");
+          } else if (mode === "sign" && signSequence.length > 0) {
+            setTimeout(() => {
+              playSign();
+              announceToScreenReader("Sign language animation started automatically.");
+            }, 1000);
+          } else {
+            if (lastStory.trim()) {
+              generateAndPlayStory();
+            }
+
+            if (signSequence.length > 0) {
+              setTimeout(() => {
+                playSign();
+                announceToScreenReader("Sign language animation started automatically.");
+              }, 2000);
+            }
+          }
+        });
+      }, 1500);
+    } else {
+      setTimeout(() => {
+        announceToScreenReader("Welcome to your accessible story page. Use accessibility controls in the top right to customize your experience.");
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

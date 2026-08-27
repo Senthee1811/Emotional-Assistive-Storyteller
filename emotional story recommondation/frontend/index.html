@@ -1,0 +1,237 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StoryPal | Welcome</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #0f2942;
+        --sky1: #e8f5ff;
+        --sky2: #fff8df;
+        --sky3: #f0ffe9;
+        --card: #ffffff;
+        --voice: #5aa7ff;
+        --sign: #22b573;
+        --pink: #ff77aa;
+        --orange: #ffb347;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 8% 18%, rgba(255, 196, 94, 0.42), transparent 26%),
+          radial-gradient(circle at 92% 14%, rgba(90, 167, 255, 0.34), transparent 28%),
+          radial-gradient(circle at 48% 88%, rgba(125, 237, 157, 0.22), transparent 30%),
+          linear-gradient(180deg, var(--sky1), var(--sky2) 60%, var(--sky3));
+        overflow: hidden;
+      }
+      .float {
+        position: fixed;
+        border-radius: 999px;
+        opacity: 0.5;
+        animation: bob 7s ease-in-out infinite;
+      }
+      .f1 { width: 90px; height: 90px; background: #a7e3ff; top: 12%; left: -22px; }
+      .f2 { width: 72px; height: 72px; background: #ffd596; top: 62%; right: -12px; animation-delay: .9s; }
+      .f3 { width: 54px; height: 54px; background: #b8ffc8; bottom: 12%; left: 14%; animation-delay: 1.5s; }
+      .f4 { width: 64px; height: 64px; background: #ffbfd8; top: 28%; right: 14%; animation-delay: 2.2s; }
+      .f5 { width: 52px; height: 52px; background: #d1c4ff; bottom: 22%; right: 8%; animation-delay: 2.8s; }
+      @keyframes bob {
+        0%,100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-12px) rotate(4deg); }
+      }
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 22px;
+      }
+      .topbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 10px;
+      }
+      .home-btn {
+        text-decoration: none;
+        background: #fff;
+        color: var(--ink);
+        border: 2px solid rgba(15, 41, 66, 0.12);
+        border-radius: 18px;
+        padding: 12px 18px;
+        font-weight: 800;
+        box-shadow: 0 10px 24px rgba(15, 41, 66, 0.12);
+        font-size: 1.05rem;
+      }
+      .hero {
+        text-align: center;
+        animation: fadeup .7s ease-out;
+      }
+      .hero-icons {
+        margin: 8px 0 10px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+      }
+      .hero-icons span {
+        display: inline-block;
+        animation: pop 1.4s ease-in-out infinite alternate;
+      }
+      .hero-icons span:nth-child(2) { animation-delay: .2s; }
+      .hero-icons span:nth-child(3) { animation-delay: .4s; }
+      .hero-icons span:nth-child(4) { animation-delay: .6s; }
+      @keyframes pop {
+        from { transform: translateY(0) scale(1); }
+        to { transform: translateY(-6px) scale(1.1); }
+      }
+      @keyframes fadeup {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .brand {
+        font-family: "Baloo 2", cursive;
+        font-size: clamp(2rem, 6vw, 3.8rem);
+        margin: 0;
+        color: #0d3a60;
+        text-shadow: 0 2px 0 #fff;
+      }
+      .tag {
+        margin: 0 auto 24px;
+        max-width: 760px;
+        font-size: clamp(1.05rem, 2.6vw, 1.35rem);
+        font-weight: 700;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 22px;
+        margin-top: 24px;
+      }
+      .card {
+        background: var(--card);
+        border-radius: 28px;
+        padding: 28px;
+        box-shadow: 0 18px 46px rgba(15, 41, 66, 0.16);
+        border: 2px solid rgba(15, 41, 66, 0.08);
+        animation: fadeup .8s ease-out;
+      }
+      .icon {
+        font-size: 62px;
+        margin-bottom: 12px;
+      }
+      .card h2 {
+        margin: 0 0 10px;
+        font-family: "Baloo 2", cursive;
+        font-size: 2rem;
+      }
+      .card p {
+        margin: 0 0 22px;
+        line-height: 1.5;
+        font-size: 1.18rem;
+        font-weight: 700;
+      }
+      button {
+        width: 100%;
+        border: none;
+        border-radius: 18px;
+        padding: 18px 18px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        cursor: pointer;
+        color: #fff;
+        transition: transform .18s ease, box-shadow .2s ease;
+        letter-spacing: 0.2px;
+      }
+      .voice { background: linear-gradient(135deg, #53b4ff, #3378ff, #6e6eff); }
+      .sign { background: linear-gradient(135deg, #39d98a, #17b26a, #009f80); }
+      button:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 14px 28px rgba(0,0,0,.2); }
+      button:active { transform: translateY(0) scale(0.99); }
+      .stars {
+        text-align: center;
+        margin-top: 14px;
+        letter-spacing: 4px;
+        color: #f7b500;
+        animation: twinkle 1.8s ease-in-out infinite alternate;
+      }
+      @keyframes twinkle {
+        from { opacity: .45; transform: scale(1); }
+        to { opacity: 1; transform: scale(1.08); }
+      }
+      .rainbow {
+        width: min(620px, 92%);
+        height: 14px;
+        margin: 22px auto 0;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #ff6b6b, #ffb347, #ffe66d, #6bff95, #6bc8ff, #a88bff, #ff8fdf);
+        animation: hueSpin 4.5s linear infinite;
+      }
+      @media (max-width: 640px) {
+        .wrap { padding: 22px 14px; }
+        .card { padding: 22px; border-radius: 22px; }
+        .card h2 { font-size: 1.8rem; }
+        .card p { font-size: 1.06rem; }
+        button { padding: 16px 14px; font-size: 1.12rem; }
+      }
+      @keyframes hueSpin {
+        from { filter: hue-rotate(0deg); }
+        to { filter: hue-rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="float f1"></div>
+    <div class="float f2"></div>
+    <div class="float f3"></div>
+    <div class="float f4"></div>
+    <div class="float f5"></div>
+    <main class="wrap">
+      <div class="topbar">
+        <a class="home-btn" href="http://localhost:8080/upload.html"> Home</a>
+      </div>
+      <section class="hero">
+        <h1 class="brand">StoryPal</h1>
+        <div class="hero-icons" aria-hidden="true">
+          <span>🌈</span><span>📚</span><span>🎈</span><span>✨</span>
+        </div>
+        <p class="tag">
+          Welcome, little reader. Pick how you want your story to be read, then we
+          will detect your mood and find the perfect story.
+        </p>
+      </section>
+      <section class="cards">
+        <article class="card">
+          <div class="icon">🎙️</div>
+          <h2>Voice Assistance</h2>
+          <p>Hear your story read with expressive child-friendly voice.</p>
+          <button class="voice" onclick="startFlow('voice')">Start With Voice</button>
+        </article>
+        <article class="card">
+          <div class="icon">🤟</div>
+          <h2>Animator</h2>
+          <p>See the story played in sign language style animation.</p>
+          <button class="sign" onclick="startFlow('sign')">Start With Animator</button>
+        </article>
+      </section>
+      <div class="stars">â˜… â˜… â˜… â˜… â˜…</div>
+      <div class="rainbow" aria-hidden="true"></div>
+    </main>
+    <script>
+      function startFlow(mode) {
+        localStorage.setItem("story_read_mode", mode);
+        window.location.href = `simulate.html?mode=${encodeURIComponent(mode)}`;
+      }
+    </script>
+  </body>
+</html>
+

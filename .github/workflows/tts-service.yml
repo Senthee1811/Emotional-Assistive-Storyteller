@@ -1,0 +1,23 @@
+name: TTS Service CI
+
+on:
+  push:
+    paths:
+      - 'services/tts-service/**'
+      - '.github/workflows/tts-service.yml'
+  pull_request:
+    paths:
+      - 'services/tts-service/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: cd services/tts-service && pip install -r requirements.txt
+      - name: Build Docker Image
+        run: docker build -t tts-service:latest ./services/tts-service
