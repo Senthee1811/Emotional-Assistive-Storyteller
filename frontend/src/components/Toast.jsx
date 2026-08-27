@@ -1,70 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 
 let toastListener = null;
 
 export const showToast = (message, type = 'info') => {
-  if (toastListener) {
-    toastListener({ id: Date.now(), message, type });
-  }
+  if (toastListener) toastListener({ id: Date.now(), message, type });
 };
 
 export default function ToastContainer() {
   const [toasts, setToasts] = useState([]);
-  const [ariaMessage, setAriaMessage] = useState('');
+  const [ariaMsg, setAriaMsg] = useState('');
 
   useEffect(() => {
-    toastListener = (newToast) => {
-      setToasts((prev) => [...prev.slice(-4), newToast]);
-      setAriaMessage(`${newToast.type === 'error' ? 'Alert' : 'Notice'}: ${newToast.message}`);
-
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== newToast.id));
-      }, 4000);
+    toastListener = (t) => {
+      setToasts((prev) => [...prev.slice(-4), t]);
+      setAriaMsg(`${t.type === 'error' ? 'Alert' : 'Notice'}: ${t.message}`);
+      setTimeout(() => setToasts((prev) => prev.filter((x) => x.id !== t.id)), 4000);
     };
-
-    return () => {
-      toastListener = null;
-    };
+    return () => { toastListener = null; };
   }, []);
+
+  const getStyles = (type) => {
+    if (type === 'error') return { background: 'rgba(127,29,29,0.9)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' };
+    if (type === 'success') return { background: 'rgba(6,78,59,0.9)', border: '1px solid rgba(16,185,129,0.3)', color: '#6ee7b7' };
+    return { background: 'rgba(15,23,42,0.92)', border: '1px solid rgba(92,124,250,0.2)', color: '#e2e8f0' };
+  };
+
+  const getIcon = (type) => {
+    if (type === 'error') return <AlertCircle size={18} color="#f87171" />;
+    if (type === 'success') return <CheckCircle size={18} color="#34d399" />;
+    return <Info size={18} color="var(--brand-400)" />;
+  };
 
   return (
     <>
-      {/* Screen Reader ARIA Live Region */}
-      <div
-        className="sr-only"
-        aria-live="polite"
-        aria-atomic="true"
-        role="status"
-      >
-        {ariaMessage}
-      </div>
-
-      {/* Visual Toast Notifications Container */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`pointer-events-auto p-4 rounded-xl border backdrop-blur-md shadow-2xl flex items-center justify-between gap-3 transition-all duration-300 transform translate-y-0 ${
-              toast.type === 'error'
-                ? 'bg-red-950/90 border-red-500/40 text-red-200'
-                : toast.type === 'success'
-                ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200'
-                : 'bg-slate-900/90 border-brand-500/40 text-slate-100'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />}
-              {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />}
-              {toast.type === 'info' && <Info className="w-5 h-5 text-brand-400 shrink-0" />}
-              <span className="text-sm font-medium leading-snug">{toast.message}</span>
+      <div className="sr-only" aria-live="polite" aria-atomic="true" role="status">{ariaMsg}</div>
+      <div style={{
+        position: 'fixed', bottom: 24, right: 24, zIndex: 9999,
+        display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 380, width: '100%', pointerEvents: 'none'
+      }}>
+        {toasts.map((t) => (
+          <div key={t.id} className="animate-fade-in" style={{
+            pointerEvents: 'auto', padding: '14px 16px', borderRadius: 'var(--radius-lg)',
+            backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+            ...getStyles(t.type)
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {getIcon(t.type)}
+              <span style={{ fontSize: '0.8125rem', fontWeight: 500, lineHeight: 1.4 }}>{t.message}</span>
             </div>
-            <button
-              onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
-              className="text-slate-400 hover:text-white p-1 rounded-lg"
-              aria-label="Close notification"
-            >
-              <X className="w-4 h-4" />
+            <button onClick={() => setToasts((p) => p.filter((x) => x.id !== t.id))}
+              style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: 4 }}
+              aria-label="Dismiss">
+              <X size={14} />
             </button>
           </div>
         ))}

@@ -1,24 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 
-export default function AudioWaveform({ isPlaying, isGenerating }) {
+export default function AudioWaveform({ isPlaying }) {
   const barsRef = useRef([]);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (prefersReducedMotion) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     if (isPlaying) {
       barsRef.current.forEach((bar, i) => {
         if (!bar) return;
-        gsap.to(bar, {
-          scaleY: 'random(0.2, 1.8)',
-          duration: 0.25 + (i % 4) * 0.05,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut'
-        });
+        gsap.to(bar, { scaleY: 0.3 + Math.random() * 1.5, duration: 0.2 + (i % 4) * 0.04, repeat: -1, yoyo: true, ease: 'sine.inOut' });
       });
     } else {
       barsRef.current.forEach((bar) => {
@@ -28,22 +20,24 @@ export default function AudioWaveform({ isPlaying, isGenerating }) {
       });
     }
 
-    return () => {
-      barsRef.current.forEach((bar) => bar && gsap.killTweensOf(bar));
-    };
+    return () => barsRef.current.forEach((bar) => bar && gsap.killTweensOf(bar));
   }, [isPlaying]);
 
   return (
-    <div className="flex items-center justify-center gap-1.5 h-12 py-2 px-4 bg-slate-900/80 border border-slate-800 rounded-xl" aria-hidden="true">
+    <div aria-hidden="true" style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+      height: 40, padding: '4px 14px',
+      background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(148,163,184,0.06)',
+      borderRadius: 'var(--radius-md)'
+    }}>
       {[...Array(9)].map((_, i) => (
-        <span
-          key={i}
-          ref={(el) => (barsRef.current[i] = el)}
-          className={`w-1.5 h-8 rounded-full transition-colors ${
-            isPlaying ? 'bg-gradient-to-t from-brand-500 to-pink-500' : 'bg-slate-700'
-          }`}
-          style={{ transform: 'scaleY(0.3)' }}
-        />
+        <span key={i} ref={(el) => (barsRef.current[i] = el)} style={{
+          width: 4, height: 28, borderRadius: 999,
+          background: isPlaying
+            ? 'linear-gradient(to top, var(--brand-500), var(--pink-400))'
+            : 'rgba(71,85,105,0.5)',
+          transform: 'scaleY(0.3)', transformOrigin: 'bottom'
+        }} />
       ))}
     </div>
   );

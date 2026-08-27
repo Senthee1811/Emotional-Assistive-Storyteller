@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import gsap from 'gsap';
+import axios from 'axios';
 import Navbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import EmotionScanner from './components/EmotionScanner';
@@ -9,6 +9,7 @@ import StutterAnalyzer from './components/StutterAnalyzer';
 import SignTranslator from './components/SignTranslator';
 import TtsPlayer from './components/TtsPlayer';
 import ToastContainer, { showToast } from './components/Toast';
+import './index.css';
 
 const GATEWAY_URL = (typeof process !== 'undefined' && process.env?.REACT_APP_GATEWAY_URL) ||
   import.meta.env?.VITE_GATEWAY_URL ||
@@ -26,21 +27,19 @@ export default function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.get(`${GATEWAY_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(res => setUser(res.data.user))
-      .catch(() => localStorage.removeItem('token'));
+      axios.get(`${GATEWAY_URL}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => setUser(res.data.user))
+        .catch(() => localStorage.removeItem('token'));
     }
   }, []);
 
+  // GSAP page transition
   useEffect(() => {
     if (contentRef.current) {
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!prefersReducedMotion) {
-        gsap.fromTo(
-          contentRef.current,
-          { opacity: 0, y: 10 },
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReduced) {
+        gsap.fromTo(contentRef.current,
+          { opacity: 0, y: 8 },
           { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
         );
       }
@@ -51,11 +50,11 @@ export default function App() {
     setTtsText(content);
     setTtsEmotion(emotion || 'happy');
     setActiveTab('tts');
-    showToast('Navigated to TTS Speech Synthesizer.', 'info');
+    showToast('Ready to synthesize story audio.', 'info');
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <ToastContainer />
 
       <Navbar
@@ -70,46 +69,41 @@ export default function App() {
         }}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8">
-        {/* Banner */}
-        <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-brand-900/60 via-purple-900/40 to-slate-900 border border-brand-500/20 flex justify-between items-center">
+      <main className="page-container">
+        {/* Hero Banner */}
+        <div className="glass-card" style={{
+          padding: '28px 32px',
+          marginBottom: '28px',
+          background: 'linear-gradient(135deg, rgba(92,124,250,0.08), rgba(214,51,108,0.06), rgba(15,23,42,0.6))',
+          border: '1px solid rgba(92,124,250,0.12)',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px'
+        }}>
           <div>
-            <span className="text-xs font-bold text-brand-400 uppercase tracking-widest bg-brand-500/10 border border-brand-500/20 px-3 py-1 rounded-full">
-              Microservices Architecture
+            <span className="badge badge-brand" style={{ marginBottom: 8, display: 'inline-block' }}>
+              Microservice Architecture
             </span>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-2">
-              StoryPal Interactive Child Reader
+            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: '1.75rem', color: 'white', letterSpacing: '-0.02em', marginTop: 4 }}>
+              StoryPal Interactive Reader
             </h1>
-            <p className="text-sm text-slate-400 mt-1">
-              API Gateway (<code className="text-brand-300">{GATEWAY_URL}</code>) routing to Auth, Emotion, Story, Stutter, Sign & TTS services.
+            <p style={{ fontSize: '0.8125rem', color: '#64748b', marginTop: 4 }}>
+              Gateway: <code style={{ color: 'var(--brand-400)', fontSize: '0.75rem' }}>{GATEWAY_URL}</code> — Auth • Emotion • Story • Stutter • Sign • TTS
             </p>
           </div>
           {activeEmotion && (
-            <div className="hidden sm:flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-800">
-              <span className="text-xs text-slate-400">Active Emotion State:</span>
-              <span className={`text-xs font-bold uppercase px-2.5 py-0.5 rounded-full ${
-                activeEmotion === 'happy' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                activeEmotion === 'sad' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-              }`}>
-                {activeEmotion}
-              </span>
+            <div className={`badge badge-${activeEmotion}`} style={{ fontSize: '0.75rem', padding: '6px 14px' }}>
+              Active Mood: {activeEmotion}
             </div>
           )}
         </div>
 
-        {/* Animated Tab Content Region */}
+        {/* Tab Content */}
         <div ref={contentRef}>
           {activeTab === 'emotion' && (
             <EmotionScanner
               gatewayUrl={GATEWAY_URL}
-              onSelectEmotion={(emo) => {
-                setActiveEmotion(emo);
-                setActiveTab('stories');
-              }}
+              onSelectEmotion={(emo) => { setActiveEmotion(emo); setActiveTab('stories'); }}
             />
           )}
-
           {activeTab === 'stories' && (
             <StoryReader
               gatewayUrl={GATEWAY_URL}
@@ -117,15 +111,8 @@ export default function App() {
               onSynthesizeStory={handleSynthesizeStory}
             />
           )}
-
-          {activeTab === 'stutter' && (
-            <StutterAnalyzer gatewayUrl={GATEWAY_URL} />
-          )}
-
-          {activeTab === 'sign' && (
-            <SignTranslator gatewayUrl={GATEWAY_URL} />
-          )}
-
+          {activeTab === 'stutter' && <StutterAnalyzer gatewayUrl={GATEWAY_URL} />}
+          {activeTab === 'sign' && <SignTranslator gatewayUrl={GATEWAY_URL} />}
           {activeTab === 'tts' && (
             <TtsPlayer
               gatewayUrl={GATEWAY_URL}
@@ -136,18 +123,21 @@ export default function App() {
         </div>
       </main>
 
-      <footer className="border-t border-slate-900 py-6 text-center text-xs text-slate-500">
-        EmotionalChildReader Microservice Platform • API Gateway BFF • 2026 Production Build
+      <footer style={{
+        borderTop: '1px solid rgba(148,163,184,0.06)',
+        padding: '20px 0',
+        textAlign: 'center',
+        fontSize: '0.75rem',
+        color: '#475569'
+      }}>
+        StoryPal — EmotionalChildReader Microservice Platform • 2026
       </footer>
 
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
         gatewayUrl={GATEWAY_URL}
-        onLoginSuccess={(u) => {
-          setUser(u);
-          showToast(`Welcome back, ${u.child_name || u.email}!`, 'success');
-        }}
+        onLoginSuccess={(u) => { setUser(u); showToast(`Welcome, ${u.child_name || u.email}!`, 'success'); }}
       />
     </div>
   );

@@ -1,108 +1,110 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
+import gsap from 'gsap';
 import { showToast } from './Toast';
 import EmotionCharacter from './EmotionCharacter';
-import { Smile, Sparkles, Camera } from 'lucide-react';
+import { Smile, Camera, Loader2 } from 'lucide-react';
 
 export default function EmotionScanner({ gatewayUrl, onSelectEmotion }) {
   const [textInput, setTextInput] = useState('');
   const [detectedEmotion, setDetectedEmotion] = useState(null);
   const [loading, setLoading] = useState(false);
+  const resultRef = useRef(null);
+
+  const animateResult = () => {
+    if (resultRef.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.fromTo(resultRef.current, { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: 'back.out(1.5)' });
+    }
+  };
 
   const handleTextScan = async () => {
-    if (!textInput.trim()) {
-      showToast('Please enter text to scan emotional tone.', 'info');
-      return;
-    }
+    if (!textInput.trim()) { showToast('Enter some text to analyze emotional tone.', 'info'); return; }
     setLoading(true);
     try {
       const res = await axios.post(`${gatewayUrl}/api/emotion/detect-text`, { text: textInput });
       setDetectedEmotion(res.data);
-      showToast(`Emotion detected: ${res.data.emotion.toUpperCase()}!`, 'success');
+      animateResult();
+      showToast(`Detected: ${res.data.emotion.toUpperCase()} (${(res.data.confidence * 100).toFixed(0)}%)`, 'success');
       if (onSelectEmotion) onSelectEmotion(res.data.emotion);
     } catch (err) {
-      console.error('Emotion scan error:', err);
-      showToast('Emotion service is temporarily degraded. Defaulting to happy state.', 'error');
-      setDetectedEmotion({ emotion: 'happy', confidence: 0.88, source: 'Fallback Engine' });
-    } finally {
-      setLoading(false);
-    }
+      showToast('Emotion service temporarily unavailable.', 'error');
+      setDetectedEmotion({ emotion: 'happy', confidence: 0.88, source: 'Fallback' });
+    } finally { setLoading(false); }
   };
 
-  const handleSimulateFacial = async () => {
+  const handleFacialScan = async () => {
     setLoading(true);
     try {
       const res = await axios.post(`${gatewayUrl}/api/emotion/detect-facial`);
       setDetectedEmotion(res.data);
-      showToast(`Facial scan complete: ${res.data.emotion.toUpperCase()}`, 'success');
+      animateResult();
+      showToast(`Facial scan: ${res.data.emotion.toUpperCase()}`, 'success');
       if (onSelectEmotion) onSelectEmotion(res.data.emotion);
     } catch (err) {
-      console.error('Facial emotion error:', err);
-      showToast('Webcam facial scanner unreachable.', 'error');
-    } finally {
-      setLoading(false);
-    }
+      showToast('Facial detection unavailable.', 'error');
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="max-w-3xl mx-auto glass-panel p-6 md:p-8">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-          <Smile className="w-5 h-5" />
+    <div className="glass-card" style={{ padding: '32px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: 'var(--radius-md)',
+          background: 'rgba(32,201,151,0.15)', border: '1px solid rgba(32,201,151,0.2)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--emerald-400)'
+        }}>
+          <Smile size={20} />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-white">Facial & Sentiment Emotion Scanner</h3>
-          <p className="text-sm text-slate-400">Microservice Route: <code className="text-emerald-400">/api/emotion/detect-*</code></p>
+          <h3 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1.25rem', color: 'white' }}>
+            Emotion Scanner
+          </h3>
+          <p style={{ fontSize: '0.75rem', color: '#64748b' }}>Face++ API & NLP Sentiment Engine</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center mb-6">
-        <div className="md:col-span-2 space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">How is the child feeling today?</label>
-            <textarea
-              rows={3}
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition-colors"
-              placeholder="e.g., I feel so happy today because we built a huge toy tower!"
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={handleTextScan}
-              disabled={loading}
-              className="bg-gradient-to-r from-brand-600 to-pink-600 text-white font-semibold px-5 py-3 rounded-xl flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {loading ? <Sparkles className="w-5 h-5 animate-spin" /> : <Smile className="w-5 h-5" />}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '24px', alignItems: 'start' }}>
+        <div>
+          <label className="label">How is the child feeling today?</label>
+          <textarea
+            className="input"
+            rows={3}
+            placeholder="e.g., I feel so happy today because we built a huge toy tower!"
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+          />
+          <div style={{ display: 'flex', gap: '10px', marginTop: '14px', flexWrap: 'wrap' }}>
+            <button className="btn btn-primary" onClick={handleTextScan} disabled={loading}>
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Smile size={16} />}
               Detect Sentiment
             </button>
-            <button
-              onClick={handleSimulateFacial}
-              disabled={loading}
-              className="bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-200 font-semibold px-5 py-3 rounded-xl flex items-center gap-2 transition-colors disabled:opacity-50"
-            >
-              <Camera className="w-5 h-5 text-emerald-400" />
-              Webcam Facial Scan (Face++)
+            <button className="btn btn-secondary" onClick={handleFacialScan} disabled={loading}>
+              <Camera size={16} />
+              Facial Scan
             </button>
           </div>
         </div>
 
-        <div className="flex justify-center bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
+        <div style={{
+          background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(148,163,184,0.08)',
+          borderRadius: 'var(--radius-xl)', padding: '16px', minWidth: '140px'
+        }}>
           <EmotionCharacter emotion={detectedEmotion?.emotion || 'happy'} />
         </div>
       </div>
 
       {detectedEmotion && (
-        <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+        <div ref={resultRef} className="glass-card" style={{
+          marginTop: '20px', padding: '16px 20px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+        }}>
           <div>
-            <span className="text-xs text-slate-400">Confidence Score</span>
-            <p className="text-lg font-bold text-white">{(detectedEmotion.confidence * 100).toFixed(0)}%</p>
+            <span style={{ fontSize: '0.6875rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Confidence</span>
+            <p style={{ fontSize: '1.125rem', fontWeight: 700, color: 'white' }}>{(detectedEmotion.confidence * 100).toFixed(0)}%</p>
           </div>
-          <div className="text-right">
-            <span className="text-xs text-slate-400">Source Engine</span>
-            <p className="text-sm font-semibold text-brand-400">{detectedEmotion.source || 'NLP Emotion Microservice'}</p>
+          <div style={{ textAlign: 'right' }}>
+            <span style={{ fontSize: '0.6875rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Engine</span>
+            <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--brand-400)' }}>{detectedEmotion.source || 'NLP Sentiment'}</p>
           </div>
         </div>
       )}
