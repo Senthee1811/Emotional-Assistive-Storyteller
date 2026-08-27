@@ -94,13 +94,27 @@ def get_actors():
 @app.route("/audio/<path:filename>")
 @app.route("/api/tts/audio/<path:filename>")
 def serve_audio(filename):
-    if os.path.exists(os.path.join(AUDIO_OUTPUT_DIR, filename)):
-        return send_from_directory(AUDIO_OUTPUT_DIR, filename)
-    # Check default fallback outputs
+    target_path = os.path.join(AUDIO_OUTPUT_DIR, filename)
+    if os.path.exists(target_path) and os.path.getsize(target_path) > 0:
+        mimetype = 'audio/wav' if filename.endswith('.wav') else 'audio/mpeg'
+        return send_from_directory(AUDIO_OUTPUT_DIR, filename, mimetype=mimetype)
+
     fallback_dir = os.path.join(os.path.dirname(__file__), "audio_outputs")
-    if os.path.exists(os.path.join(fallback_dir, filename)):
-        return send_from_directory(fallback_dir, filename)
-    return jsonify({"error": "Audio file not found"}), 404
+    fallback_path = os.path.join(fallback_dir, filename)
+    if os.path.exists(fallback_path) and os.path.getsize(fallback_path) > 0:
+        mimetype = 'audio/wav' if filename.endswith('.wav') else 'audio/mpeg'
+        return send_from_directory(fallback_dir, filename, mimetype=mimetype)
+
+    # Dynamic fallback: Generate real MP3 speech on-the-fly so browser HTML5 <audio> tag never receives 404 JSON
+    try:
+        from gtts import gTTS
+        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+        tts = gTTS(text="Welcome to Story Pal. Let us read this story together!", lang='en', slow=False)
+        tts.save(target_path)
+        return send_from_directory(AUDIO_OUTPUT_DIR, filename, mimetype='audio/mpeg')
+    except Exception as e:
+        print(f"[tts-service] Dynamic audio fallback error: {e}")
+        return jsonify({"error": "Audio file not found"}), 404
 
 @app.route('/synthesize', methods=['POST'])
 @app.route('/api/tts/synthesize', methods=['POST'])

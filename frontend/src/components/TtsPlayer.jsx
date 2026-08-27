@@ -63,16 +63,31 @@ export default function TtsPlayer({ gatewayUrl, textToSynthesize, emotionToSynth
   };
 
   const handlePlaySentence = (idx) => {
-    if (idx >= playlist.length) {
+    if (!playlist || idx >= playlist.length) {
       setIsPlaying(false);
       setCurrentSentenceIdx(0);
       return;
     }
     setCurrentSentenceIdx(idx);
     setIsPlaying(true);
+
+    const item = playlist[idx];
+    const src = `${gatewayUrl}${item.audio_url}`;
+
     if (audioRef.current) {
-      audioRef.current.src = `${gatewayUrl}${playlist[idx].audio_url}`;
-      audioRef.current.play().catch(e => console.log('Audio playback block:', e));
+      audioRef.current.src = src;
+      audioRef.current.play().catch((err) => {
+        console.warn('HTML5 Audio play failed, falling back to Web Speech API:', err);
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(item.sentence);
+          utterance.onend = () => handleAudioEnded();
+          window.speechSynthesis.speak(utterance);
+        } else {
+          showToast('Audio playback failed in browser context.', 'error');
+          setIsPlaying(false);
+        }
+      });
     }
   };
 
