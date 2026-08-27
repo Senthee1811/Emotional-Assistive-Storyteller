@@ -9,7 +9,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'emotional-child-reader-secret-key-
 app.use(cors());
 app.use(express.json());
 
-// In-memory isolated user store for Auth Service
 const users = [
   {
     id: 'usr-001',
@@ -24,7 +23,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'auth-service', port: Number(PORT) });
 });
 
-app.post('/api/auth/register', (req, res) => {
+const handleRegister = (req, res) => {
   const { username, email, password, child_name } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password required' });
@@ -46,9 +45,9 @@ app.post('/api/auth/register', (req, res) => {
 
   const token = jwt.sign({ id: newUser.id, email: newUser.email, child_name: newUser.child_name }, JWT_SECRET, { expiresIn: '24h' });
   res.status(201).json({ status: 'success', user: { id: newUser.id, email: newUser.email, child_name: newUser.child_name }, token });
-});
+};
 
-app.post('/api/auth/login', (req, res) => {
+const handleLogin = (req, res) => {
   const { email, password } = req.body;
   const user = users.find(u => u.email === email && u.password === password);
 
@@ -58,9 +57,9 @@ app.post('/api/auth/login', (req, res) => {
 
   const token = jwt.sign({ id: user.id, email: user.email, child_name: user.child_name }, JWT_SECRET, { expiresIn: '24h' });
   res.json({ status: 'success', user: { id: user.id, email: user.email, child_name: user.child_name }, token });
-});
+};
 
-app.get('/api/auth/me', (req, res) => {
+const handleMe = (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Missing token' });
@@ -73,7 +72,17 @@ app.get('/api/auth/me', (req, res) => {
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' });
   }
-});
+};
+
+// Support both gateway routed & direct paths
+app.post('/register', handleRegister);
+app.post('/api/auth/register', handleRegister);
+
+app.post('/login', handleLogin);
+app.post('/api/auth/login', handleLogin);
+
+app.get('/me', handleMe);
+app.get('/api/auth/me', handleMe);
 
 app.listen(PORT, () => {
   console.log(`[auth-service] Running on port ${PORT}`);

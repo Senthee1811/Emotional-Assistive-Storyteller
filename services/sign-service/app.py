@@ -20,6 +20,7 @@ SIGN_DICTIONARY = {
 def health():
     return jsonify({"status": "ok", "service": "sign-service", "port": PORT})
 
+@app.route('/translate', methods=['POST'])
 @app.route('/api/sign/translate', methods=['POST'])
 def translate_text():
     data = request.json or {}
@@ -31,7 +32,6 @@ def translate_text():
         if w in SIGN_DICTIONARY:
             sequence.append({"word": w, "found": True, **SIGN_DICTIONARY[w]})
         else:
-            # Fingerspell fallback
             sequence.append({"word": w, "found": False, "fingerspell": list(w)})
             
     return jsonify({
@@ -40,6 +40,7 @@ def translate_text():
         "total_words": len(words)
     })
 
+@app.route('/predict-landmarks', methods=['POST'])
 @app.route('/api/sign/predict-landmarks', methods=['POST'])
 def predict_landmarks():
     data = request.json or {}

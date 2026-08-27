@@ -14,16 +14,14 @@ AUDIO_DIR = os.environ.get("TTS_AUDIO_DIR", "audio_outputs")
 
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
-# In-memory job queue store
 JOBS = {}
 
 def process_tts_job(job_id, text, emotion, speaker):
     try:
-        time.sleep(1.5) # Simulate audio synthesis delay
+        time.sleep(1.0)
         filename = f"{job_id}.mp3"
         filepath = os.path.join(AUDIO_DIR, filename)
         
-        # Synthesize audio using gTTS
         tts = gTTS(text=text, lang='en', slow=False)
         tts.save(filepath)
         
@@ -48,6 +46,7 @@ def process_tts_job(job_id, text, emotion, speaker):
 def health():
     return jsonify({"status": "ok", "service": "tts-service", "active_jobs": len(JOBS)})
 
+@app.route('/synthesize', methods=['POST'])
 @app.route('/api/tts/synthesize', methods=['POST'])
 def submit_synthesis():
     data = request.json or {}
@@ -62,7 +61,6 @@ def submit_synthesis():
         "submitted_at": time.time()
     }
     
-    # Launch async background thread for audio synthesis
     t = threading.Thread(target=process_tts_job, args=(job_id, text, emotion, speaker))
     t.daemon = True
     t.start()
@@ -73,6 +71,7 @@ def submit_synthesis():
         "message": "TTS synthesis started asynchronously"
     }), 202
 
+@app.route('/jobs/<job_id>', methods=['GET'])
 @app.route('/api/tts/jobs/<job_id>', methods=['GET'])
 def get_job_status(job_id):
     job = JOBS.get(job_id)
@@ -80,6 +79,7 @@ def get_job_status(job_id):
         return jsonify({"error": "Job not found"}), 404
     return jsonify(job)
 
+@app.route('/audio/<filename>', methods=['GET'])
 @app.route('/api/tts/audio/<filename>', methods=['GET'])
 def get_audio_file(filename):
     filepath = os.path.join(AUDIO_DIR, filename)

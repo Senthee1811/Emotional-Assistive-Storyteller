@@ -46,10 +46,12 @@ STORIES = [
 def health():
     return jsonify({"status": "ok", "service": "story-service", "port": PORT})
 
+@app.route('/', methods=['GET'])
 @app.route('/api/stories/', methods=['GET'])
 def get_all_stories():
     return jsonify({"stories": STORIES, "total": len(STORIES)})
 
+@app.route('/<story_id>', methods=['GET'])
 @app.route('/api/stories/<story_id>', methods=['GET'])
 def get_story(story_id):
     story = next((s for s in STORIES if s["id"] == story_id), None)
@@ -57,12 +59,12 @@ def get_story(story_id):
         return jsonify({"error": "Story not found"}), 404
     return jsonify(story)
 
+@app.route('/recommend', methods=['POST'])
 @app.route('/api/stories/recommend', methods=['POST'])
 def recommend_story():
     data = request.json or {}
     emotion = data.get("emotion", "happy").lower()
     
-    # Filter stories matching target emotion or fallback to all
     matched = [s for s in STORIES if s["emotion"] == emotion]
     if not matched:
         matched = STORIES

@@ -7,17 +7,15 @@ const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 
-// Environment targets with local fallbacks
 const TARGETS = {
-  auth: process.env.AUTH_SERVICE_URL || 'http://localhost:5001',
-  emotion: process.env.EMOTION_SERVICE_URL || 'http://localhost:5002',
-  story: process.env.STORY_SERVICE_URL || 'http://localhost:5003',
-  stutter: process.env.STUTTER_SERVICE_URL || 'http://localhost:5004',
-  sign: process.env.SIGN_SERVICE_URL || 'http://localhost:5005',
-  tts: process.env.TTS_SERVICE_URL || 'http://localhost:5006'
+  auth: process.env.AUTH_SERVICE_URL || 'http://127.0.0.1:5001',
+  emotion: process.env.EMOTION_SERVICE_URL || 'http://127.0.0.1:5002',
+  story: process.env.STORY_SERVICE_URL || 'http://127.0.0.1:5003',
+  stutter: process.env.STUTTER_SERVICE_URL || 'http://127.0.0.1:5004',
+  sign: process.env.SIGN_SERVICE_URL || 'http://127.0.0.1:5005',
+  tts: process.env.TTS_SERVICE_URL || 'http://127.0.0.1:5006'
 };
 
-// Gateway Health & Route Directory
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -27,12 +25,12 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Proxy helper with resilient error handler / circuit breaker
 const makeProxy = (targetUrl, name) => {
   return createProxyMiddleware({
     target: targetUrl,
     changeOrigin: true,
-    timeout: 15000,
+    timeout: 30000,
+    proxyTimeout: 30000,
     onError: (err, req, res) => {
       console.error(`[Gateway Proxy Error] Target '${name}' (${targetUrl}): ${err.message}`);
       res.status(503).json({
@@ -45,7 +43,6 @@ const makeProxy = (targetUrl, name) => {
   });
 };
 
-// Route definitions
 app.use('/api/auth', makeProxy(TARGETS.auth, 'auth-service'));
 app.use('/api/emotion', makeProxy(TARGETS.emotion, 'emotion-service'));
 app.use('/api/stories', makeProxy(TARGETS.story, 'story-service'));

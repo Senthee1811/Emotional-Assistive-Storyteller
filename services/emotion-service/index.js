@@ -32,10 +32,9 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'emotion-service', facepp_configured: !!FACEPP_CONFIG.apiKey });
 });
 
-app.post('/api/emotion/detect-facial', upload.single('image'), async (req, res) => {
+const handleDetectFacial = async (req, res) => {
   try {
     if (!req.file) {
-      // Fallback response for testing without image upload
       return res.json({
         emotion: 'happy',
         confidence: 0.92,
@@ -84,9 +83,9 @@ app.post('/api/emotion/detect-facial', upload.single('image'), async (req, res) 
       source: 'Mock Fallback (API error)'
     });
   }
-});
+};
 
-app.post('/api/emotion/detect-text', (req, res) => {
+const handleDetectText = (req, res) => {
   const { text } = req.body;
   if (!text) {
     return res.status(400).json({ error: 'Text required' });
@@ -111,7 +110,14 @@ app.post('/api/emotion/detect-text', (req, res) => {
   }
 
   res.json({ emotion, confidence, text_length: text.length });
-});
+};
+
+// Dual route mapping
+app.post('/detect-facial', upload.single('image'), handleDetectFacial);
+app.post('/api/emotion/detect-facial', upload.single('image'), handleDetectFacial);
+
+app.post('/detect-text', handleDetectText);
+app.post('/api/emotion/detect-text', handleDetectText);
 
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');

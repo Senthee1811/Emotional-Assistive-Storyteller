@@ -38,16 +38,13 @@ init_db()
 async def health():
     return {"status": "ok", "service": "stutter-service"}
 
-@app.post("/api/stutter/analyze")
-async def analyze_stutter(audio: UploadFile = File(None)):
+async def _process_analyze(audio: UploadFile = None):
     filename = audio.filename if audio else "recorded_sample.wav"
     
-    # Acoustic disfluency scoring logic
     is_stutter = True if "stutter" in filename.lower() or "test" in filename.lower() else False
     confidence = 0.86 if is_stutter else 0.94
     disfluency = "repetition" if is_stutter else "fluent"
     
-    # Store in isolated SQLite datastore
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     now = time.time()
@@ -68,8 +65,15 @@ async def analyze_stutter(audio: UploadFile = File(None)):
         "recommendation": "Try repeating sentence rhythmically." if is_stutter else "Great fluent speech flow!"
     }
 
-@app.get("/api/stutter/history")
-async def get_history():
+@app.post("/analyze")
+async def analyze_root(audio: UploadFile = File(None)):
+    return await _process_analyze(audio)
+
+@app.post("/api/stutter/analyze")
+async def analyze_prefixed(audio: UploadFile = File(None)):
+    return await _process_analyze(audio)
+
+async def _process_history():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT id, filename, is_stutter, confidence, disfluency_type, timestamp FROM stutter_logs ORDER BY id DESC LIMIT 10")
@@ -87,6 +91,14 @@ async def get_history():
             "timestamp": r[5]
         })
     return {"history": history}
+
+@app.get("/history")
+async def get_history_root():
+    return await _process_history()
+
+@app.get("/api/stutter/history")
+async def get_history_prefixed():
+    return await _process_history()
 
 if __name__ == "__main__":
     import uvicorn
