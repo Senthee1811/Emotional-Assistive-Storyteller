@@ -8,7 +8,9 @@ import StutterAnalyzer from './components/StutterAnalyzer';
 import SignTranslator from './components/SignTranslator';
 import TtsPlayer from './components/TtsPlayer';
 
-const GATEWAY_URL = process.env.REACT_APP_GATEWAY_URL || 'http://localhost:4000';
+const GATEWAY_URL = (typeof process !== 'undefined' && process.env?.REACT_APP_GATEWAY_URL) ||
+  import.meta.env?.VITE_GATEWAY_URL ||
+  'http://localhost:4000';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('stories');
