@@ -29,8 +29,8 @@ const makeProxy = (targetUrl, name) => {
   return createProxyMiddleware({
     target: targetUrl,
     changeOrigin: true,
-    timeout: 30000,
-    proxyTimeout: 30000,
+    timeout: 120000,
+    proxyTimeout: 120000,
     onError: (err, req, res) => {
       console.error(`[Gateway Proxy Error] Target '${name}' (${targetUrl}): ${err.message}`);
       res.status(503).json({

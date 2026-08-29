@@ -9,6 +9,12 @@ import random
 model = joblib.load("random_forest_model.pkl")
 scaler = joblib.load("scaler.pkl")
 
+# Patch scikit-learn compatibility for newer versions
+if hasattr(model, 'estimators_'):
+    for dt in model.estimators_:
+        if not hasattr(dt, 'monotonic_cst'):
+            dt.monotonic_cst = None
+
 # Speech therapy exercises categorized by disorder severity
 SPEECH_EXERCISES = {
     'mild': [

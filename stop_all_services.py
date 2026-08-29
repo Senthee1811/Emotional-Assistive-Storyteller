@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 STATE_FILE = ROOT / ".services_pids.json"
-PORTS = [5000, 5001, 8000, 8080, 8100]
+PORTS = [3000, 4000, 5000, 5001, 5002, 5003, 5004, 5005, 5006, 8000, 8080, 8100]
 
 
 def _run(cmd):
@@ -67,8 +67,12 @@ def main():
         _kill_pid(pid)
         killed.add(pid)
 
-    print(f"Stopped processes: {sorted(killed)}")
+    if killed:
+        print(f"Stopped microservice processes: {sorted(killed)}")
+    else:
+        print("No active microservice processes found.")
 
 
 if __name__ == "__main__":
     main()
+

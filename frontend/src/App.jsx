@@ -1,144 +1,176 @@
-import React, { useState, useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
-import AuthModal from './components/AuthModal';
-import EmotionScanner from './components/EmotionScanner';
+import Hero from './components/Hero';
+import AuthPage from './components/AuthPage';
 import StoryReader from './components/StoryReader';
+import EmotionScanner from './components/EmotionScanner';
 import StutterAnalyzer from './components/StutterAnalyzer';
 import SignTranslator from './components/SignTranslator';
-import TtsPlayer from './components/TtsPlayer';
-import ToastContainer, { showToast } from './components/Toast';
-import './index.css';
-
-const GATEWAY_URL = (typeof process !== 'undefined' && process.env?.REACT_APP_GATEWAY_URL) ||
-  import.meta.env?.VITE_GATEWAY_URL ||
-  'http://localhost:4000';
+import DeliveryModeModal from './components/DeliveryModeModal';
+import Toast from './components/Toast';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('stories');
-  const [user, setUser] = useState(null);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
   const [activeEmotion, setActiveEmotion] = useState('happy');
-  const [ttsText, setTtsText] = useState('');
-  const [ttsEmotion, setTtsEmotion] = useState('happy');
-  const contentRef = useRef(null);
+  const [user, setUser] = useState(null);
+  const [toasts, setToasts] = useState([]);
+  const [deliveryMode, setDeliveryMode] = useState(() => {
+    return localStorage.getItem('storyDeliveryMode') || 'tts';
+  });
+  const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios.get(`${GATEWAY_URL}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(res => setUser(res.data.user))
-        .catch(() => localStorage.removeItem('token'));
+  const showToast = (message, type = 'info') => {
+    const id = Date.now().toString();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4500);
+  };
+
+  const handleDismissToast = (id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const handleLoginSuccess = (userObj) => {
+    setUser(userObj);
+    // After login, open delivery choice modal to confirm preferences
+    setIsDeliveryModalOpen(true);
+    setActiveTab('stories');
+  };
+
+  const handleSelectDeliveryMode = (mode) => {
+    setDeliveryMode(mode);
+    localStorage.setItem('storyDeliveryMode', mode);
+    showToast(
+      mode === 'sign'
+        ? 'Story mode set to 🤟 Indian Sign Language (Saved for all future sessions)'
+        : 'Story mode set to 🎧 Text-to-Speech Voice Narration',
+      'success'
+    );
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    showToast('You have been logged out. See you next time! 👋', 'info');
+    setActiveTab('home');
+  };
+
+  const handleStartReading = () => {
+    // If not chosen before, or to confirm, open modal; else go straight to stories in saved mode
+    if (!localStorage.getItem('storyDeliveryMode')) {
+      setIsDeliveryModalOpen(true);
     }
-  }, []);
-
-  // GSAP page transition
-  useEffect(() => {
-    if (contentRef.current) {
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!prefersReduced) {
-        gsap.fromTo(contentRef.current,
-          { opacity: 0, y: 8 },
-          { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
-        );
-      }
-    }
-  }, [activeTab]);
-
-  const handleSynthesizeStory = (content, emotion) => {
-    setTtsText(content);
-    setTtsEmotion(emotion || 'happy');
-    setActiveTab('tts');
-    showToast('Ready to synthesize story audio.', 'info');
+    setActiveTab('stories');
   };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <ToastContainer />
+      {/* Accessible Live Toast System */}
+      <Toast toasts={toasts} onDismiss={handleDismissToast} />
 
+      {/* Story Delivery Mode Selection Modal */}
+      <DeliveryModeModal
+        isOpen={isDeliveryModalOpen}
+        onClose={() => setIsDeliveryModalOpen(false)}
+        currentMode={deliveryMode}
+        onSelectMode={handleSelectDeliveryMode}
+      />
+
+      {/* Top Navbar */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        activeEmotion={activeEmotion}
         user={user}
-        onOpenAuth={() => setIsAuthOpen(true)}
-        onLogout={() => {
-          localStorage.removeItem('token');
-          setUser(null);
-          showToast('Logged out successfully.', 'info');
-        }}
+        onLogout={handleLogout}
       />
 
-      <main className="page-container">
-        {/* Hero Banner */}
-        <div className="glass-card" style={{
-          padding: '28px 32px',
-          marginBottom: '28px',
-          background: 'linear-gradient(135deg, rgba(92,124,250,0.08), rgba(214,51,108,0.06), rgba(15,23,42,0.6))',
-          border: '1px solid rgba(92,124,250,0.12)',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px'
-        }}>
-          <div>
-            <span className="badge badge-brand" style={{ marginBottom: 8, display: 'inline-block' }}>
-              Microservice Architecture
-            </span>
-            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: '1.75rem', color: 'white', letterSpacing: '-0.02em', marginTop: 4 }}>
-              StoryPal Interactive Reader
-            </h1>
-            <p style={{ fontSize: '0.8125rem', color: '#64748b', marginTop: 4 }}>
-              Gateway: <code style={{ color: 'var(--brand-400)', fontSize: '0.75rem' }}>{GATEWAY_URL}</code> — Auth • Emotion • Story • Stutter • Sign • TTS
-            </p>
-          </div>
-          {activeEmotion && (
-            <div className={`badge badge-${activeEmotion}`} style={{ fontSize: '0.75rem', padding: '6px 14px' }}>
-              Active Mood: {activeEmotion}
-            </div>
-          )}
-        </div>
+      {/* Main View Router */}
+      <main style={{ flex: 1 }}>
+        {activeTab === 'home' && (
+          <Hero
+            onStartReading={handleStartReading}
+            onScanEmotion={() => setActiveTab('emotion')}
+            activeEmotion={activeEmotion}
+            setActiveEmotion={setActiveEmotion}
+          />
+        )}
 
-        {/* Tab Content */}
-        <div ref={contentRef}>
-          {activeTab === 'emotion' && (
-            <EmotionScanner
-              gatewayUrl={GATEWAY_URL}
-              onSelectEmotion={(emo) => { setActiveEmotion(emo); setActiveTab('stories'); }}
-            />
-          )}
-          {activeTab === 'stories' && (
-            <StoryReader
-              gatewayUrl={GATEWAY_URL}
-              activeEmotion={activeEmotion}
-              onSynthesizeStory={handleSynthesizeStory}
-            />
-          )}
-          {activeTab === 'stutter' && <StutterAnalyzer gatewayUrl={GATEWAY_URL} />}
-          {activeTab === 'sign' && <SignTranslator gatewayUrl={GATEWAY_URL} />}
-          {activeTab === 'tts' && (
-            <TtsPlayer
-              gatewayUrl={GATEWAY_URL}
-              textToSynthesize={ttsText}
-              emotionToSynthesize={ttsEmotion}
-            />
-          )}
-        </div>
+        {activeTab === 'login' && (
+          <AuthPage
+            onLoginSuccess={handleLoginSuccess}
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'stories' && (
+          <StoryReader
+            activeEmotion={activeEmotion}
+            user={user}
+            deliveryMode={deliveryMode}
+            onToggleDeliveryMode={handleSelectDeliveryMode}
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'emotion' && (
+          <EmotionScanner
+            activeEmotion={activeEmotion}
+            setActiveEmotion={setActiveEmotion}
+            onSelectStory={() => setActiveTab('stories')}
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'stutter' && (
+          <StutterAnalyzer
+            showToast={showToast}
+          />
+        )}
+
+        {activeTab === 'sign' && (
+          <SignTranslator
+            showToast={showToast}
+          />
+        )}
       </main>
 
-      <footer style={{
-        borderTop: '1px solid rgba(148,163,184,0.06)',
-        padding: '20px 0',
-        textAlign: 'center',
-        fontSize: '0.75rem',
-        color: '#475569'
-      }}>
-        StoryPal — EmotionalChildReader Microservice Platform • 2026
+      {/* Footer */}
+      <footer
+        style={{
+          borderTop: '1px solid var(--border-glass)',
+          background: 'rgba(11, 15, 25, 0.8)',
+          backdropFilter: 'blur(16px)',
+          padding: '30px 24px',
+          textAlign: 'center',
+          fontSize: '0.85rem',
+          color: 'var(--text-dim)'
+        }}
+      >
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            ✨ <strong>EmotionalChildReader</strong> • Multi-Sensory Inclusive Storytelling AI
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              onClick={() => setIsDeliveryModalOpen(true)}
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid var(--border-glass)',
+                color: '#C7D2FE',
+                padding: '4px 12px',
+                borderRadius: 'var(--radius-full)',
+                fontSize: '0.78rem',
+                cursor: 'pointer'
+              }}
+            >
+              ⚙️ Delivery: {deliveryMode === 'sign' ? '🤟 Sign Language' : '🎧 TTS Audio'}
+            </button>
+            <span>•</span>
+            <span>Microservices Architecture</span>
+          </div>
+        </div>
       </footer>
-
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        gatewayUrl={GATEWAY_URL}
-        onLoginSuccess={(u) => { setUser(u); showToast(`Welcome, ${u.child_name || u.email}!`, 'success'); }}
-      />
     </div>
   );
 }

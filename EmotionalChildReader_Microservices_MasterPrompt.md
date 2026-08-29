@@ -1,88 +1,122 @@
-# MASTER PROMPT — EmotionalChildReader: Fix TTS Regression + Frontend UX/Animation Upgrade
+# MASTER PROMPT — EmotionalChildReader: 21st.dev Frontend Rebuild + Wire In Real Original Backends
 
-You are acting as a **Senior Full-Stack Engineer Agent** working on the already-microservice-converted `EmotionalChildReader` system. There are two separate workstreams below. **Do the TTS fix first** — it's a functional regression from the migration and blocks real testing of everything else. Only move to the frontend workstream once TTS is verified working end-to-end.
+You are acting as a **Senior Full-Stack Engineer Agent** on `EmotionalChildReader`. The current build has two classes of problems:
+
+1. The frontend needs a full visual/UX rebuild using **21st.dev components**.
+2. Multiple backend modules that exist and work on disk are **not actually being used** by the running system — the app is either faking their output or not calling them at all. You must locate, read, and correctly wire in the **real original backends** before the frontend rebuild is considered done, because a beautiful UI on top of fake backend output is not an acceptable outcome here.
+
+**Do not treat this as "rebuild frontend, backend is a separate concern."** Every screen you rebuild must be wired to real, verified backend output. Fix backend-by-backend, verify each, then build/rebuild the corresponding frontend screen against the real thing.
 
 ---
 
-## PART A — Fix the TTS Regression (Priority 1)
+## 0. Ground Truth: The Four Original Backend Modules
 
-### A.0 Diagnose Before Touching Code
-The original monolith used **Coqui XTTS** (via a Flask backend) for speech synthesis. After the microservice split, the new **TTS Synthesis Service is not actually invoking the original Coqui XTTS model** — something was lost, stubbed, or misconfigured in extraction.
+The real, working backend logic already exists on disk in these locations. Do not reimplement from scratch — **read the existing code first**, understand what it actually does, and integrate/expose it correctly. Only write new code where something is genuinely missing or broken.
 
-Before writing any fix, investigate and report on:
-1. Does the extracted `tts-service` still import/load Coqui XTTS at all, or was it replaced with a placeholder/mock during the split?
-2. Are the model weights/checkpoint files actually present and reachable from the new service's container (check paths, volume mounts, `.gitignore` exclusions — it's possible the model files were excluded from the build context and never copied in)?
-3. Is the Flask app inside the new service actually the same code path as the original, or was it rewritten and the XTTS invocation dropped/changed?
-4. Is the request reaching the service at all (gateway routing correct, correct port, correct payload shape), or is it reaching the service but falling through to a fallback/no-op TTS path?
-5. Check logs/stack traces from a live request end-to-end (gateway → tts-service) rather than guessing.
+| Module | Path | Responsibility |
+|---|---|---|
+| Text-to-Speech | `EmotionalChildReader (1)\EmotionalChildReader\New folder - Copy (2)\text-to-speech` | Coqui XTTS-based emotional speech synthesis of story text |
+| Emotion/Story Recommendation | `EmotionalChildReader (1)\EmotionalChildReader\New folder - Copy (2)\emotional story recommondation` | Camera-based mood/emotion detection, used to recommend a story matching the child's current mood |
+| Sign Language | `EmotionalChildReader (1)\EmotionalChildReader\New folder - Copy (2)\sign` | Sign language module |
+| Stutter Detection | `EmotionalChildReader (1)\EmotionalChildReader\New folder - Copy (2)\stutter` | Stutter detection module |
 
-Write findings before fixing. **Do not silently reintroduce a synchronous/monolith-style call as a workaround** — the fix must live inside the microservice boundary established in the prior migration (own container, own API contract, async job flow if that's what was designed).
+For each module: open and actually read the code (not just filenames) before deciding how to integrate it. Do not assume behavior from folder names alone — verify against the real implementation, the same way the TTS bug below was found by reading the actual Flask service.
 
-### A.1 Fix and Restore
-- Restore the actual Coqui XTTS inference call inside the `tts-service`, using the original model config/voice/emotion parameters from the monolith (diff against the pre-migration code to confirm parity — sample rate, speaker embedding, emotion-conditioning inputs, output format).
-- Ensure model weights are correctly baked into or mounted into the container (document which approach you chose and why — baked-in image vs. mounted volume vs. downloaded-on-boot — given model file size).
-- Re-verify the async job flow: submit text → job queued → XTTS actually runs → audio artifact produced → frontend notified/polls successfully.
+---
+
+## PART A — Fix the TTS Backend (Known Bug, Reference Implementation Attached)
+
+### A.0 The Bug
+The current system's TTS output **plays a pre-existing dataset/reference audio clip instead of audio generated from the actual story sentence**. Coqui XTTS is not actually being invoked to synthesize the input text — something in the pipeline is short-circuiting to a reference sample.
+
+The real TTS backend (Flask, at the `text-to-speech` path above) is structured like this — use it as the reference implementation, not something to discard:
+
+- `server.py` (attached in this task) exposes: `/predict-xtts`, `/synthesize` / `/process-story-xtts` (sentence-by-sentence playlist generation with per-sentence emotion detection via `EmotionPredictor`), `/regenerate-from-index-xtts`, `/feedback` (`like_voice`/`dislike_voice` for per-child voice preference), and `/audio/<file>` for serving generated files.
+- Core synthesis call is `generate_child_friendly_emotion_tts(...)` from `pipeline_xtts_ravdess.py`, which takes the **actual sentence text**, an `emotion_id`, `actor_id`, `gender`, and child/session identifiers, and is expected to return a **newly generated** audio file path + metadata.
+- It also imports `ravdess_ref_picker.pick_ravdess_reference` — this is almost certainly where the bug lives: RAVDESS reference clips should only be used as a **speaker/emotion reference input to condition XTTS**, not returned as the final output audio. **Read `pipeline_xtts_ravdess.py` and `ravdess_ref_picker.py` directly** and confirm which of these is happening:
+  - (a) XTTS is called correctly with the sentence text and a reference clip as a conditioning/speaker-embedding input, and the bug is elsewhere (e.g. caching returning a stale/wrong file, or `out_path` pointing at the reference file by mistake), **or**
+  - (b) The pipeline never actually calls XTTS inference on the text at all, and `pick_ravdess_reference(...)`'s return value is being passed straight through as `out_path`.
+- There's also a **cache layer** (`make_story_cache_key` / `load_story_cache` / `save_story_cache`) in `server.py` — verify this isn't serving stale cached responses from an earlier broken run, which could look identical to a live bug even after (a)/(b) above are fixed.
+
+### A.1 Fix
+- Fix the actual root cause found in A.0 — restore real XTTS synthesis of the input sentence, using the reference audio only for conditioning (voice/emotion), not as the output.
+- Clear/invalidate any stale cache entries generated while the bug was live (old cache keys may point to reference-audio files, not synthesized ones).
+- Preserve the existing API contract (`/synthesize`, `/predict-xtts`, `/regenerate-from-index-xtts`, `/feedback`, `/audio/<file>`) — the frontend rebuild in Part C will depend on these routes behaving as documented in `server.py`.
 
 ### A.2 Verify
-- Run a real end-to-end synthesis request and confirm the output audio is generated by the actual model (not silence, not a stub file, not a cached/hardcoded sample) — compare output to what the original monolith produced for the same input if possible.
-- Add an integration test that fails loudly if TTS ever silently falls back to a no-op again (this is the root cause you're fixing — make regressions impossible to miss next time).
-
-Do not proceed to Part B until you can demonstrate a real, model-generated audio file coming back through the full gateway → tts-service → frontend path.
-
----
-
-## PART B — Frontend UX, Animation, and Notification Upgrade
-
-### B.0 Context Constraint (read before implementing)
-This app's core end-users are **visually impaired children** — their guardians/therapists are likely the ones actually looking at the screen and navigating the UI on the child's behalf, or using screen readers. Treat the visual polish below as making the app better for the people who *do* look at the screen, not as a replacement for audio-first, screen-reader-friendly interaction. Concretely:
-- Every animation must be purely additive — the app must remain fully usable and understandable with animations/JS disabled or `prefers-reduced-motion` set.
-- Every toast/visual notification must have an audio or ARIA-live equivalent — a visual-only toast is not accessible to the actual child using this product.
-- Don't let animation timing block or delay real actions (e.g., don't make the child wait for a decorative animation to finish before audio starts playing).
-
-### B.1 Component Library — 21st.dev
-- Integrate [21st.dev](https://21st.dev) components into the React frontend for the UI primitives (buttons, cards, inputs, modals, etc.), replacing ad-hoc/inline-styled elements where a suitable component exists.
-- Keep a consistent design system: pull tokens (spacing, color, radius) from 21st.dev's components rather than mixing them with leftover custom CSS.
-- Where a 21st.dev component doesn't fit the child-friendly tone needed (see B.2), it's fine to extend/restyle it rather than force a mismatched default.
-
-### B.2 Animations — GSAP, Child-Friendly
-Use GSAP to add purposeful, playful motion at these key workflow moments (not decoration for its own sake):
-- **Story selection/loading**: a lively, bouncy transition when a story is chosen, signaling "something is happening" for a young user.
-- **Emotion feedback**: when the Emotion Detection Service returns a result, animate an expressive character/icon reacting (happy bounce, calm sway, excited wiggle) so emotional tone is reinforced visually, not just via a text label.
-- **TTS playback**: an animated waveform, character mouth-sync, or pulsing icon synced to audio playback state (loading → playing → done), so a sighted user watching along gets clear visual feedback matching what's being read aloud.
-- **Navigation/page transitions**: smooth, short (≤ 400ms) transitions between major screens — no jarring cuts, but nothing so long it feels sluggish for a child's attention span.
-- Respect `prefers-reduced-motion`: provide a reduced/no-animation variant of each of the above (per the B.0 constraint).
-
-### B.3 Toast Notifications
-Add a toast system (e.g. via a library compatible with the 21st.dev design system, or a lightweight one like `react-hot-toast`/`sonner` restyled to match) covering:
-- TTS job states: "Generating your story's voice…" → "Your story is ready to play!" → error state if synthesis fails (tie this to Part A's failure modes — a dead/stubbed TTS must surface a clear error toast, not fail silently).
-- Auth events: login success/failure, session expiry.
-- Content actions: story saved, progress synced, connection lost/restored (relevant since this now talks to multiple backend services — a downstream service being down should produce a friendly, non-technical toast, not a raw error).
-- Keep copy simple and warm — this is a children's product; error messages should be reassuring ("Let's try that again!") rather than technical, while still being accurate enough for a guardian to know what happened.
-- Pair every toast with an `aria-live="polite"` (or `assertive` for errors) announcement per B.0.
-
-### B.4 Workflow/UX Improvements
-- Map the current click-path for the core loop (pick a story → read/listen → see emotion feedback → move to next) and simplify it — fewer taps/clicks, larger touch targets, clear single-action-per-screen where possible for a young user.
-- Add loading/empty/error states everywhere a network call happens (many of these didn't exist pre-migration when calls were in-process and instant; now they cross service boundaries and can be slow or fail — the UI must account for that).
-- Add a persistent, obvious way to replay the last audio without re-navigating (kids will want to hear things again).
+- Call `/synthesize` with real story text and confirm the returned audio is **audibly different per sentence and per emotion**, and is not identical to a static reference/dataset clip (compare file hashes/waveforms between two different input sentences — they must differ).
+- Confirm `/feedback` like/dislike actually affects subsequent voice selection (`get_voice_seed`) as intended.
+- Do not report this fixed without producing real generated audio as evidence, per the actual sentence submitted.
 
 ---
 
-## PART C — Debug and Final Verification
+## PART B — Wire In the Other Real Backends
 
-1. Full regression pass: confirm the TTS fix from Part A still works after the Part B frontend changes are wired in (they touch the same playback flow).
-2. Test the full user loop with animations enabled and with `prefers-reduced-motion` enabled — both must be fully functional.
-3. Test toast behavior under real failure conditions: kill the TTS service mid-request, kill the emotion-detection service, simulate a slow network — confirm toasts and animations degrade gracefully rather than hanging or crashing the UI.
-4. Zero build errors, zero lint errors, across frontend and all services.
-5. Report: what was actually broken in the TTS path (root cause, not just symptom), what you changed, and what you verified for each part of the frontend upgrade — with evidence (test output, screen recording description, or logs), not just a claim of completion.
+For each of the remaining three modules, follow the same discipline as Part A: **read the real code at the given path before integrating**, do not stub or fake its output, and verify real behavior end-to-end.
+
+### B.1 Camera-Based Mood Detection → Story Recommendation
+- Read the backend at the `emotional story recommondation` path. Understand exactly how it captures/processes camera input and what mood/emotion labels it outputs.
+- Wire it into the microservice architecture as its own service (own container, own API contract) — do not merge its logic into another service.
+- Confirm the story recommendation logic genuinely uses the detected mood to select a story (not a hardcoded/default story regardless of detected mood).
+- Verify: trigger with different simulated/real moods and confirm different stories are recommended accordingly.
+
+### B.2 Sign Language Module
+- Read the backend at the `sign` path and determine what it actually does today (recognition, translation, video/gesture input/output — confirm from the real code, don't assume).
+- Integrate it as its own service with a clear API contract, and identify where in the frontend user flow it belongs.
+- Verify with real input against the module's actual expected input format.
+
+### B.3 Stutter Detection Module
+- Read the backend at the `stutter` path and determine its actual function (detection from audio/speech input, what it outputs, how confident/frequent its signal is).
+- Integrate it as its own service with a clear API contract, and identify where in the frontend user flow it belongs (e.g. feeding into the reading/practice experience).
+- Verify with real input.
+
+For all three: if the module is incomplete, broken, or clearly experimental/unfinished in its current form, **say so explicitly in your report** rather than building a polished frontend around output that doesn't actually work — flag it and propose the minimum real fix needed rather than faking a response to unblock the UI.
+
+---
+
+## PART C — Frontend Rebuild with 21st.dev
+
+Only start this part once Parts A and B have been verified with real backend output.
+
+### C.0 Scope
+Rebuild the frontend using **21st.dev components for all UI elements** — buttons, forms, cards, navigation, modals, audio player controls, camera preview UI, etc. This should read as a professional, cohesive product, not a component-by-component patch job.
+
+### C.1 Screens to Build/Rebuild (mapped to real backends)
+- **Story reader/player**: wired to the fixed TTS service (Part A) — real playback of generated, per-sentence, per-emotion audio, with loading/error states for the async generation flow, and a working like/dislike control tied to `/feedback`.
+- **Mood-based story picker**: wired to the camera-based mood detection service (B.1) — camera permission UX, live/periodic mood capture, and a clear "here's what we detected → here's what we recommend" moment.
+- **Sign language screen(s)**: wired to the sign language service (B.2), matching whatever real input/output that module actually supports.
+- **Stutter-aware reading/practice screen**: wired to the stutter detection service (B.3), surfacing its signal in a supportive, non-judgmental, child-appropriate way (this is a sensitive signal for a child user — no harsh "error" framing).
+
+### C.2 Accessibility Constraint (do not skip)
+This product's core end-users are **visually impaired children**, and several new modules here (camera mood detection, sign language) are inherently visual. For each screen:
+- Ensure there's a non-visual path or clear audio narration of what the camera/mood/sign detection is doing and what it found — a visually impaired child cannot rely on seeing a camera preview or a detected-mood icon.
+- Full keyboard navigation and screen-reader-sensible markup on every 21st.dev component used.
+- Respect `prefers-reduced-motion` for any animated feedback (e.g. mood-detection result animation).
+
+### C.3 UX Details
+- Consistent loading/empty/error states across every screen, since each now depends on a separate backend service that can be slow or unavailable.
+- Toast notifications for key events (story ready to play, mood detected, sign recognized, stutter signal noted, any service unavailable) — friendly, simple, child-appropriate copy, paired with an ARIA-live announcement per C.2.
+- Remove all old/dead frontend code and any UI that was built around the previous faked/broken backend output.
+
+---
+
+## PART D — Final Verification
+
+1. Fresh environment: bring up all backend services (TTS, mood/recommendation, sign, stutter) plus the gateway, then the new frontend.
+2. Full manual walkthrough of every screen in C.1, confirming each is driven by real backend output — not a stub, cache artifact, or hardcoded response.
+3. Specifically re-confirm the TTS fix (Part A) still holds after the frontend rewrite touches the playback UI.
+4. Kill each backend service one at a time while using the frontend — confirm graceful, clearly communicated degradation (toast + accessible state), not a crash or silent failure.
+5. Zero build/lint/type errors across frontend and all services.
+6. Report, per module (TTS, mood/recommendation, sign, stutter, frontend): what was actually wrong or missing, what you changed, and what real evidence you have that it now works — not a completion claim alone.
 
 ---
 
 ## Output Format Expected From the Agent
 
-For each part (A, B, C), respond with:
-1. **Root cause / what I found**
-2. **What changed** (file-level, not vague)
-3. **How I verified it** (real test/run, not assumption)
+For each part (A, B, C, D):
+1. **What I found reading the real code** (be specific — function names, file names, the actual bug)
+2. **What changed**
+3. **How I verified it** (real request/response, real audio, real detection output — not assumption)
 4. **Remaining risks or follow-ups**
 
-Do not report Part A as fixed without producing real, model-generated audio as evidence. Do not report Part B as complete without confirming reduced-motion and accessibility fallbacks work.
+Do not report Part A fixed without producing distinct, sentence-specific generated audio as evidence. Do not report Part B modules done without demonstrating real detection/output from each. Do not report Part C done without confirming every screen is wired to a verified-real backend from Parts A and B.
