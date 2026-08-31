@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import {
   Hand, Search, Sparkles, Volume2, Play, Pause, RotateCcw,
   ChevronRight, ChevronLeft, FastForward, CheckCircle2, BookOpen
@@ -35,6 +36,18 @@ export default function SignTranslator({ showToast }) {
   const canvasRef = useRef(null);
   const animationTimerRef = useRef(null);
   const currentFrameRef = useRef(0);
+  const signContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (signContainerRef.current) {
+      gsap.fromTo(
+        signContainerRef.current.querySelectorAll('.sign-card-anim'),
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.12, ease: 'power2.out' }
+      );
+    }
+  }, []);
 
   // Fetch available labels from sign-service
   useEffect(() => {
@@ -186,9 +199,9 @@ export default function SignTranslator({ showToast }) {
   });
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '40px auto 80px', padding: '0 20px' }}>
+    <div ref={signContainerRef} style={{ maxWidth: '1100px', margin: '40px auto 80px', padding: '0 20px' }}>
       {/* Title & Introduction */}
-      <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+      <div className="sign-card-anim" style={{ textAlign: 'center', marginBottom: '36px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
           <span className="badge badge-primary" style={{ fontSize: '0.85rem' }}>
             MediaPipe 260-Joint Landmark Skeleton Studio
@@ -204,7 +217,7 @@ export default function SignTranslator({ showToast }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '28px', marginBottom: '36px' }}>
         {/* Left: Interactive Canvas Skeleton Player */}
-        <div className="glass-card" style={{ padding: '28px', border: '1px solid rgba(236,72,153,0.3)' }}>
+        <div className="glass-card sign-card-anim" style={{ padding: '28px', border: '1px solid rgba(236,72,153,0.3)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(236,72,153,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -314,7 +327,7 @@ export default function SignTranslator({ showToast }) {
         </div>
 
         {/* Right: Text Translator Input & Sequence Builder */}
-        <div className="glass-card" style={{ padding: '28px' }}>
+        <div className="glass-card sign-card-anim" style={{ padding: '28px' }}>
           <h2 style={{ fontSize: '1.25rem', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Sparkles color="var(--primary-light)" size={20} />
             <span>Interactive Sentence Translator</span>
@@ -384,7 +397,7 @@ export default function SignTranslator({ showToast }) {
       </div>
 
       {/* Vocabulary Library & Category Badges */}
-      <div className="glass-card" style={{ padding: '30px' }}>
+      <div className="glass-card sign-card-anim" style={{ padding: '30px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
           <div>
             <h2 style={{ fontSize: '1.4rem', marginBottom: '4px' }}>Sign Language Vocabulary Explorer</h2>

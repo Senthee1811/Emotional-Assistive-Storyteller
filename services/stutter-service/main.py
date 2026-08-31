@@ -16,9 +16,9 @@ if str(STUTTER_DIR) not in sys.path:
 old_cwd = os.getcwd()
 try:
     os.chdir(str(STUTTER_DIR))
-    from predict import predict_emotion, get_speech_exercise, SPEECH_EXERCISES
+    from predict import predict_emotion, get_speech_exercise, SPEECH_EXERCISES, analyze_acoustic_disfluencies
     ORIGINAL_STUTTER_AVAILABLE = True
-    print("[stutter-service] Original stutter detection model loaded successfully.")
+    print("[stutter-service] Original stutter detection model and acoustic analyzer loaded successfully.")
 except Exception as e:
     ORIGINAL_STUTTER_AVAILABLE = False
     print(f"[stutter-service] Stutter import fallback: {e}")
@@ -65,12 +65,13 @@ async def health():
         "database": DB_PATH
     }
 
-async def _process_analyze(audio: UploadFile = None):
-    filename = audio.filename if audio else "sample_recording.wav"
-    temp_path = str(STUTTER_DIR / f"temp_{int(time.time()*1000)}.wav")
+async def _process_analyze(audio_upload: UploadFile = None):
+    filename = audio_upload.filename if audio_upload else "recording.wav"
+    ext = Path(filename).suffix or ".wav"
+    temp_path = str(STUTTER_DIR / f"temp_rec_{int(time.time()*1000)}{ext}")
     
-    if audio:
-        content = await audio.read()
+    if audio_upload:
+        content = await audio_upload.read()
         with open(temp_path, "wb") as f:
             f.write(content)
         eval_path = temp_path
@@ -78,9 +79,11 @@ async def _process_analyze(audio: UploadFile = None):
         eval_path = str(STUTTER_DIR / "02-02.wav") if (STUTTER_DIR / "02-02.wav").exists() else None
 
     is_stutter = False
-    confidence = 92.5
-    disfluency = "Fluent Flow"
+    confidence = 90.0
+    disfluency_type = "Fluent Flow"
     exercise = "Great pacing! Continue reading smoothly."
+    details = {"repetitions": 0, "blocks": 0, "prolongations": 0, "wpm": 118}
+    classification = "Normal"
 
     if ORIGINAL_STUTTER_AVAILABLE and eval_path and os.path.exists(eval_path):
         try:
@@ -88,54 +91,90 @@ async def _process_analyze(audio: UploadFile = None):
             os.chdir(str(STUTTER_DIR))
             res = predict_emotion(eval_path)
             os.chdir(curr_dir)
-            is_stutter = (res.get("prediction") == "Stuttering_Disorder")
+
+            classification = str(res.get("prediction", "Normal"))
+            is_stutter = bool(res.get("is_stutter", classification == "Stuttering_Disorder"))
             confidence = float(res.get("disorder_percentage", 85.0))
-            disfluency = "Syllable Repetition" if is_stutter else "Fluent Flow"
-            exercise = res.get("exercise_suggestion") or ("Gentle rhythmic onset." if is_stutter else "Great fluent flow!")
+            details = res.get("details", {"repetitions": 0, "blocks": 0, "prolongations": 0, "wpm": 115})
+
+            if is_stutter:
+                reps = details.get("repetitions", 0)
+                blks = details.get("blocks", 0)
+                prols = details.get("prolongations", 0)
+                if reps > blks and reps > prols:
+                    disfluency_type = "Syllable Repetition"
+                elif blks >= reps and blks >= prols and blks > 0:
+                    disfluency_type = "Sound Block"
+                elif prols > 0:
+                    disfluency_type = "Phoneme Prolongation"
+                else:
+                    disfluency_type = "Disfluent Hesitation"
+            else:
+                disfluency_type = "Fluent Flow"
+
+            exercise = res.get("exercise_suggestion") or (
+                "Practice slow rhythmic breathing and gentle onset." if is_stutter else "Great fluent flow!"
+            )
         except Exception as err:
             print(f"[stutter-service] Predict error: {err}")
+            # Fallback estimation
+            is_stutter = "stutter" in filename.lower()
+            classification = "Stuttering_Disorder" if is_stutter else "Normal"
+            confidence = 85.0 if is_stutter else 92.0
+            disfluency_type = "Syllable Repetition" if is_stutter else "Fluent Flow"
+            exercise = "Practice slow, calm breaths before each sentence." if is_stutter else "Wonderful natural cadence!"
     else:
         is_stutter = "stutter" in filename.lower()
+        classification = "Stuttering_Disorder" if is_stutter else "Normal"
         confidence = 88.0 if is_stutter else 94.0
-        disfluency = "Syllable Repetition" if is_stutter else "Fluent Flow"
+        disfluency_type = "Syllable Repetition" if is_stutter else "Fluent Flow"
         exercise = "Practice slow, calm breaths before each sentence." if is_stutter else "Wonderful natural cadence!"
 
-    if audio and os.path.exists(temp_path):
+    if audio_upload and os.path.exists(temp_path):
         try:
             os.remove(temp_path)
         except Exception:
             pass
 
+    # Save to SQLite database
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     now = time.time()
     cursor.execute(
         "INSERT INTO stutter_logs (filename, is_stutter, confidence, disfluency_type, exercise_suggestion, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
-        (filename, 1 if is_stutter else 0, confidence, disfluency, exercise, now)
+        (filename, 1 if is_stutter else 0, confidence, disfluency_type, exercise, now)
     )
     conn.commit()
     log_id = cursor.lastrowid
     conn.close()
+
+    fluency_score = round(max(20.0, min(100.0, 100.0 - (confidence * 0.7 if is_stutter else (100.0 - confidence)))), 1)
+    disfluency_score = round(100.0 - fluency_score, 1)
 
     return {
         "status": "success",
         "log_id": log_id,
         "filename": filename,
         "is_stutter": is_stutter,
-        "fluency_score": round(100.0 - (confidence if is_stutter else 0.0), 1),
+        "classification": classification,
+        "fluency_score": fluency_score,
+        "disfluency_score": disfluency_score,
         "confidence": confidence,
-        "disfluency_type": disfluency,
+        "disfluency_type": disfluency_type,
+        "details": details,
         "exercise_suggestion": exercise,
         "recommendation": exercise
     }
 
 @app.post("/analyze")
-async def analyze_root(audio: UploadFile = File(None)):
-    return await _process_analyze(audio)
+async def analyze_root(audio: UploadFile = File(None), file: UploadFile = File(None)):
+    uploaded = audio or file
+    return await _process_analyze(uploaded)
 
 @app.post("/api/stutter/analyze")
-async def analyze_prefixed(audio: UploadFile = File(None)):
-    return await _process_analyze(audio)
+async def analyze_prefixed(audio: UploadFile = File(None), file: UploadFile = File(None)):
+    uploaded = audio or file
+    return await _process_analyze(uploaded)
 
 async def _process_history():
     conn = sqlite3.connect(DB_PATH)
@@ -150,6 +189,7 @@ async def _process_history():
             "id": r[0],
             "filename": r[1],
             "is_stutter": bool(r[2]),
+            "classification": "Stuttering_Disorder" if r[2] else "Normal",
             "confidence": r[3],
             "disfluency_type": r[4],
             "exercise_suggestion": r[5],

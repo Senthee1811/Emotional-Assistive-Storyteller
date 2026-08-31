@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import gsap from 'gsap';
 import {
   Smile, MessageSquare, Sparkles, RefreshCw, Camera, Video,
   Volume2, BookOpen, ArrowRight, CheckCircle2, AlertCircle, Eye
@@ -18,6 +19,18 @@ export default function EmotionScanner({ activeEmotion, setActiveEmotion, onSele
 
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const scannerRef = useRef(null);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (scannerRef.current) {
+      gsap.fromTo(
+        scannerRef.current.querySelectorAll('.scanner-card-anim'),
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.12, ease: 'power2.out' }
+      );
+    }
+  }, []);
 
   const emotionsData = [
     { id: 'happy', label: 'Joyful & Happy', emoji: '🌟', color: '#10B981' },
@@ -193,9 +206,9 @@ export default function EmotionScanner({ activeEmotion, setActiveEmotion, onSele
   };
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '40px auto 80px', padding: '0 20px' }}>
+    <div ref={scannerRef} style={{ maxWidth: '1100px', margin: '40px auto 80px', padding: '0 20px' }}>
       {/* Title & Introduction */}
-      <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+      <div className="scanner-card-anim" style={{ textAlign: 'center', marginBottom: '36px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
           <span className="badge badge-primary" style={{ fontSize: '0.85rem' }}>
             PyTorch Emotion Ensemble AI & Camera Scanner
@@ -211,7 +224,7 @@ export default function EmotionScanner({ activeEmotion, setActiveEmotion, onSele
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '28px' }}>
         {/* Left: Camera & Facial Mood Detector */}
-        <div className="glass-card" style={{ padding: '30px' }}>
+        <div className="glass-card scanner-card-anim" style={{ padding: '30px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -340,7 +353,7 @@ export default function EmotionScanner({ activeEmotion, setActiveEmotion, onSele
         {/* Right: Results, Emotion Breakdown & Story Recommendations */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Active Emotion Display & Mascot */}
-          <div className="glass-card" style={{ padding: '28px', textAlign: 'center' }}>
+          <div className="glass-card scanner-card-anim" style={{ padding: '28px', textAlign: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <span className={`badge badge-${activeEmotion}`} style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
                 Current Mood: {activeEmotion.toUpperCase()}
@@ -376,7 +389,8 @@ export default function EmotionScanner({ activeEmotion, setActiveEmotion, onSele
                             width: `${Math.round(item.confidence * 100)}%`,
                             height: '100%',
                             background: item.emotion === activeEmotion ? 'var(--primary-light)' : 'var(--text-dim)',
-                            borderRadius: '4px'
+                            borderRadius: '4px',
+                            transition: 'width 0.6s ease'
                           }}
                         />
                       </div>
@@ -410,7 +424,9 @@ export default function EmotionScanner({ activeEmotion, setActiveEmotion, onSele
                       justifyContent: 'center',
                       gap: '6px',
                       fontSize: '0.8rem',
-                      fontWeight: 600
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
                     }}
                     aria-pressed={activeEmotion === e.id}
                   >
@@ -422,11 +438,23 @@ export default function EmotionScanner({ activeEmotion, setActiveEmotion, onSele
             </div>
           </div>
 
-          {/* Recommended Story Section ("Here's what we found -> Here's what we recommend") */}
-          <div className="glass-card" style={{ padding: '24px', border: '1px solid rgba(99,102,241,0.3)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <BookOpen color="var(--primary-light)" size={20} />
-              <h3 style={{ fontSize: '1.15rem' }}>Recommended Story for You</h3>
+          {/* Recommended Story Section */}
+          <div className="glass-card scanner-card-anim" style={{ padding: '24px', border: '1px solid rgba(99,102,241,0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <BookOpen color="var(--primary-light)" size={20} />
+                <h3 style={{ fontSize: '1.15rem' }}>Recommended Story for You</h3>
+              </div>
+              {onSelectStory && (
+                <button
+                  onClick={onSelectStory}
+                  className="btn-fun"
+                  style={{ padding: '6px 14px', fontSize: '0.8rem' }}
+                >
+                  <span>Go to Reader</span>
+                  <ArrowRight size={14} />
+                </button>
+              )}
             </div>
 
             {recommendedStories.length > 0 ? (
@@ -449,9 +477,21 @@ export default function EmotionScanner({ activeEmotion, setActiveEmotion, onSele
                       <div style={{ fontWeight: 700, fontSize: '0.98rem', marginBottom: '4px' }}>{story.title}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{story.summary?.slice(0, 65)}...</div>
                     </div>
-                    <span className={`badge badge-${story.emotion || 'happy'}`} style={{ fontSize: '0.75rem' }}>
-                      {story.emotion}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className={`badge badge-${story.emotion || 'happy'}`} style={{ fontSize: '0.75rem' }}>
+                        {story.emotion}
+                      </span>
+                      {onSelectStory && (
+                        <button
+                          onClick={onSelectStory}
+                          className="btn-secondary"
+                          style={{ padding: '6px 10px', fontSize: '0.78rem', borderRadius: 'var(--radius-sm)' }}
+                          aria-label={`Read story ${story.title}`}
+                        >
+                          <span>Read</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

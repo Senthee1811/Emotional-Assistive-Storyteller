@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import {
   Play, Pause, RotateCcw, Volume2, Hand, Sparkles, User, Award,
   CheckCircle2, ChevronRight, ChevronLeft, RefreshCw, ThumbsUp, ThumbsDown,
@@ -135,6 +136,18 @@ export default function StoryReader({ activeEmotion, user, deliveryMode = 'tts',
   const audioRef = useRef(null);
   const canvasRef = useRef(null);
   const animationFrameRef = useRef(null);
+  const readerContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (readerContainerRef.current) {
+      gsap.fromTo(
+        readerContainerRef.current.querySelectorAll('.story-anim'),
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.12, ease: 'power2.out' }
+      );
+    }
+  }, []);
 
   // Fetch story catalog from story-service
   useEffect(() => {
@@ -408,9 +421,9 @@ export default function StoryReader({ activeEmotion, user, deliveryMode = 'tts',
   const isSignMode = deliveryMode === 'sign';
 
   return (
-    <div style={{ maxWidth: '1150px', margin: '40px auto 80px', padding: '0 20px' }}>
+    <div ref={readerContainerRef} style={{ maxWidth: '1150px', margin: '40px auto 80px', padding: '0 20px' }}>
       {/* Top Bar with Mode Switcher & Accessibility Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '28px' }}>
+      <div className="story-anim" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '28px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h1 className="fun-font" style={{ fontSize: '2.4rem', marginBottom: '4px' }}>
@@ -515,7 +528,7 @@ export default function StoryReader({ activeEmotion, user, deliveryMode = 'tts',
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '28px' }}>
         {/* Story Reading Card */}
-        <div className="glass-card" style={{ padding: '32px' }}>
+        <div className="glass-card story-anim" style={{ padding: '32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <span className={`badge badge-${selectedStory?.emotion || 'happy'}`}>
               Mood Target: {selectedStory?.emotion || 'happy'}
@@ -581,7 +594,7 @@ export default function StoryReader({ activeEmotion, user, deliveryMode = 'tts',
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {isSignMode ? (
             /* Sign Language Real-Time Skeleton Studio */
-            <div className="glass-card" style={{ padding: '28px', border: '1px solid rgba(236,72,153,0.35)' }}>
+            <div className="glass-card story-anim" style={{ padding: '28px', border: '1px solid rgba(236,72,153,0.35)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(236,72,153,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -666,7 +679,7 @@ export default function StoryReader({ activeEmotion, user, deliveryMode = 'tts',
             </div>
           ) : (
             /* Coqui XTTS Voice Studio */
-            <div className="glass-card" style={{ padding: '28px' }}>
+            <div className="glass-card story-anim" style={{ padding: '28px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
                 <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Volume2 color="var(--primary-light)" size={22} />

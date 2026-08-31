@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import AuthPage from './components/AuthPage';
@@ -18,6 +19,7 @@ export default function App() {
     return localStorage.getItem('storyDeliveryMode') || 'tts';
   });
   const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
+  const mainContentRef = useRef(null);
 
   const showToast = (message, type = 'info') => {
     const id = Date.now().toString();
@@ -33,7 +35,6 @@ export default function App() {
 
   const handleLoginSuccess = (userObj) => {
     setUser(userObj);
-    // After login, open delivery choice modal to confirm preferences
     setIsDeliveryModalOpen(true);
     setActiveTab('stories');
   };
@@ -56,15 +57,26 @@ export default function App() {
   };
 
   const handleStartReading = () => {
-    // If not chosen before, or to confirm, open modal; else go straight to stories in saved mode
     if (!localStorage.getItem('storyDeliveryMode')) {
       setIsDeliveryModalOpen(true);
     }
     setActiveTab('stories');
   };
 
+  // GSAP tab switch animation
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (mainContentRef.current) {
+      gsap.fromTo(
+        mainContentRef.current,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }
+      );
+    }
+  }, [activeTab]);
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       {/* Accessible Live Toast System */}
       <Toast toasts={toasts} onDismiss={handleDismissToast} />
 
@@ -85,8 +97,8 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      {/* Main View Router */}
-      <main style={{ flex: 1 }}>
+      {/* Main View Router with GSAP smooth transitions */}
+      <main ref={mainContentRef} style={{ flex: 1, width: '100%' }}>
         {activeTab === 'home' && (
           <Hero
             onStartReading={handleStartReading}
@@ -139,12 +151,14 @@ export default function App() {
       <footer
         style={{
           borderTop: '1px solid var(--border-glass)',
-          background: 'rgba(11, 15, 25, 0.8)',
+          background: 'rgba(11, 15, 25, 0.85)',
           backdropFilter: 'blur(16px)',
-          padding: '30px 24px',
+          WebkitBackdropFilter: 'blur(16px)',
+          padding: '28px 24px',
           textAlign: 'center',
           fontSize: '0.85rem',
-          color: 'var(--text-dim)'
+          color: 'var(--text-dim)',
+          marginTop: 'auto'
         }}
       >
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
@@ -158,10 +172,20 @@ export default function App() {
                 background: 'rgba(255,255,255,0.06)',
                 border: '1px solid var(--border-glass)',
                 color: '#C7D2FE',
-                padding: '4px 12px',
+                padding: '6px 14px',
                 borderRadius: 'var(--radius-full)',
-                fontSize: '0.78rem',
-                cursor: 'pointer'
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(99, 102, 241, 0.2)';
+                e.currentTarget.style.borderColor = 'var(--primary-light)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+                e.currentTarget.style.borderColor = 'var(--border-glass)';
               }}
             >
               ⚙️ Delivery: {deliveryMode === 'sign' ? '🤟 Sign Language' : '🎧 TTS Audio'}
